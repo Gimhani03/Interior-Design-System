@@ -41,7 +41,7 @@ const AddFurniture = () => {
       };
       await axios.post('http://localhost:5001/api/furniture', finalData);
       alert("✅ Furniture added successfully!");
-      navigate('/admin');
+      navigate('/furniture-catalog');
     } catch (err) {
       alert("❌ Error: Check if all fields are filled correctly.");
     }
@@ -147,7 +147,7 @@ const AddFurniture = () => {
               <button type="submit" style={{ flex: 1, padding: '20px', background: '#3E2723', color: '#fff', border: 'none', borderRadius: '15px', fontSize: '20px', fontWeight: '800', cursor: 'pointer', transition: '0.3s' }}>
                 Publish Product
               </button>
-              <button type="button" onClick={() => navigate('/admin/furniture-management')} style={{ flex: 1, padding: '20px', background: '#fff', color: '#3E2723', border: '2.5px solid #3E2723', borderRadius: '15px', fontSize: '20px', fontWeight: '800', cursor: 'pointer' }}>
+              <button type="button" onClick={() => navigate('/admin/furniture-catalog')} style={{ flex: 1, padding: '20px', background: '#fff', color: '#3E2723', border: '2.5px solid #3E2723', borderRadius: '15px', fontSize: '20px', fontWeight: '800', cursor: 'pointer' }}>
                 Cancel
               </button>
             </div>

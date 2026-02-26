@@ -61,7 +61,7 @@ const EditFurniture = () => {
       };
       await axios.put(`http://localhost:5001/api/furniture/${id}`, updatedData);
       alert("✅ Update Successful!");
-      navigate('/admin');
+      navigate('/furniture-catalog');
     } catch (err) {
       alert("❌ Update failed. Check server logs.");
     }
@@ -143,7 +143,7 @@ const EditFurniture = () => {
               <button type="submit" style={{ flex: 2, padding: '20px', background: '#3E2723', color: '#fff', border: 'none', borderRadius: '15px', fontSize: '20px', fontWeight: '800' }}>
                 Update Product
               </button>
-              <button type="button" onClick={() => navigate('/admin')} style={{ flex: 1, padding: '20px', background: '#fff', color: '#3E2723', border: '2.5px solid #3E2723', borderRadius: '15px', fontSize: '20px', fontWeight: '800' }}>
+              <button type="button" onClick={() => navigate('/furniture-catalog')} style={{ flex: 1, padding: '20px', background: '#fff', color: '#3E2723', border: '2.5px solid #3E2723', borderRadius: '15px', fontSize: '20px', fontWeight: '800' }}>
                 Cancel
               </button>
             </div>
