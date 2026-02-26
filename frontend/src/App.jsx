@@ -10,9 +10,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import Profile from './pages/Profile.jsx'
 import AboutUs from './pages/AboutUs.jsx'
-import Catalog from './pages/Catalog.jsx'
 import Designer from './pages/Designer.jsx'
-import Home from './pages/Home.jsx'
 import FurnitureCatalog from './pages/FurnitureCatalog';
 import ProductDetails from './pages/ProductDetails'; 
 import AdminDashboard from './pages/AdminDashboard.jsx';
@@ -25,8 +23,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/home" element={<Home />} />
+      <Route path="/" element={<AboutUs />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
