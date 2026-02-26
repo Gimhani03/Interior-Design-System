@@ -1,0 +1,108 @@
+/* FurnitureCatalog.css */
+.furniture-catalog-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #f7f6f3;
+  padding-top: 70px;
+  font-family: 'Inter', sans-serif;
+}
+
+.furniture-catalog-container {
+  max-width: 1650px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.furniture-catalog-title {
+  font-size: 48px;
+  color: #3E2723;
+  margin-bottom: 18px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+.furniture-catalog-desc {
+  font-size: 22px;
+  color: #795548;
+  margin-bottom: 40px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.furniture-catalog-searchbar {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.furniture-catalog-search {
+  padding: 18px 28px;
+  font-size: 18px;
+  flex: 2;
+  min-width: 260px;
+  border-radius: 16px;
+  border: 1px solid #E0E0E0;
+  background: #FBFBFB;
+  outline: none;
+  color: #3E2723;
+  font-weight: 500;
+}
+
+.furniture-catalog-sort {
+  padding: 0 22px;
+  font-size: 17px;
+  flex: 0.5;
+  min-width: 160px;
+  border-radius: 16px;
+  border: 1px solid #E0E0E0;
+  background: #FBFBFB;
+  color: #3E2723;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.furniture-catalog-categories {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.furniture-catalog-category-btn {
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #F5F2F0;
+  color: #5D4037;
+  transition: 0.3s;
+}
+
+.furniture-catalog-category-btn.selected {
+  background: #3E2723;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(62,39,35,0.12);
+}
+
+.furniture-catalog-count {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3E2723;
+  letter-spacing: 0.2px;
+  margin-bottom: 24px;
+}
+
+.furniture-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 32px;
+}
