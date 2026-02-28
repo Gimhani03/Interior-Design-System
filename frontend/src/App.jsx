@@ -17,6 +17,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import AddFurniture from './pages/AddFurniture';
 import EditFurniture from './pages/EditFurniture';
 import FurnitureManagement from './pages/FurnitureManagement.jsx'
+import ManageUsers from './pages/ManageUsers.jsx'
 
 function App() {
   
@@ -40,6 +41,7 @@ function App() {
       <Route path="/product/:id" element={<ProductDetails />} />
           
           {/* Admin routes */}
+          <Route path="/admin/users" element={<ManageUsers />} />
           <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
           <Route path="/admin/add" element={<AddFurniture />} />
           <Route path="/admin/edit/:id" element={<EditFurniture />} />
