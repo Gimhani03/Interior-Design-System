@@ -6,6 +6,8 @@ const authRoutes = require('./routes/auth');
 const passwordRoutes = require('./routes/password');
 const furnitureRoutes = require('./routes/furnitureRoutes');
 
+const userRoutes = require('./routes/user');
+
 const app = express();
 
 // Connect to Database
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/password', passwordRoutes);
 app.use('/api/furniture', furnitureRoutes);
+
+app.use('/api/users', userRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
