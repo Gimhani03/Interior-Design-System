@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Search, Sofa } from 'lucide-react'
-import Navbar from '../components/Navbar'
-import AdminSidebar from '../components/AdminSidebar'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
+import { useNavigate } from 'react-router-dom'
+import { AdminLayout } from '../components/AdminLayout'
+import './AdminDashboard.css'
 
 const FurnitureManagement = () => {
   const [furniture, setFurniture] = useState([])
@@ -47,116 +38,95 @@ const FurnitureManagement = () => {
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <AdminSidebar />
-
-      <div className="ml-56 pt-[68px]">
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Furniture Management</h1>
-              <p className="text-muted-foreground text-sm mt-1">Add, edit, and remove furniture products.</p>
-            </div>
-            <Button asChild>
-              <Link to="/admin/add">
-                <Plus size={16} className="mr-2" /> Add New Furniture
-              </Link>
-            </Button>
+    <AdminLayout title="Manage Furniture">
+      <div className="admin-table-card">
+        <div className="admin-table-header">
+          <div>
+            <span className="admin-table-title">Furniture Items</span>
+            <p style={{ fontSize: 12, color: '#9CA3AF', margin: '2px 0 0' }}>
+              {filtered.length} product{filtered.length !== 1 ? 's' : ''} listed
+            </p>
           </div>
+          <div className="admin-table-actions">
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <svg style={{ position: 'absolute', left: 10, color: '#C9A882', pointerEvents: 'none' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                className="admin-table-search"
+                style={{ paddingLeft: 32 }}
+                placeholder="Search products…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <button className="admin-add-btn" onClick={() => navigate('/admin/add')}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Furniture
+            </button>
+          </div>
+        </div>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Sofa size={16} /> Product Catalog
-                  </CardTitle>
-                  <CardDescription className="mt-1">
-                    {filtered.length} product{filtered.length !== 1 ? 's' : ''} listed
-                  </CardDescription>
-                </div>
-                <div className="relative w-64">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search products..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 h-9"
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <Separator />
-            <CardContent className="p-0">
-              {filtered.length === 0 ? (
-                <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
-                  No furniture items found.
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30">
-                      <TableHead className="pl-6">Product</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right pr-6">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filtered.map((item) => (
-                      <TableRow key={item._id}>
-                        <TableCell className="pl-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg border border-border overflow-hidden bg-muted shrink-0">
-                              <img
-                                src={item.imagePath}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => { e.target.style.display = 'none' }}
-                              />
-                            </div>
-                            <span className="font-medium text-sm">{item.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="text-xs">{item.category}</Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">Rs. {item.price?.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <Badge variant="success" className="text-xs">Active</Badge>
-                        </TableCell>
-                        <TableCell className="text-right pr-6">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => navigate(`/admin/edit/${item._id}`)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDelete(item._id)}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-
+        <div className="admin-table-wrap">
+          {filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0', color: '#9CA3AF', fontSize: 14 }}>No furniture items found.</div>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((item) => (
+                  <tr key={item._id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                          width: 38, height: 38, borderRadius: 8, border: '1px solid #F3EDE6',
+                          overflow: 'hidden', background: '#FAF8F5', flexShrink: 0
+                        }}>
+                          <img
+                            src={item.imagePath}
+                            alt={item.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={e => { e.target.style.display = 'none' }}
+                          />
+                        </div>
+                        <span style={{ fontWeight: 500, fontSize: 13 }}>{item.name}</span>
+                      </div>
+                    </td>
+                    <td><span className="admin-cat-badge">{item.category}</span></td>
+                    <td style={{ fontWeight: 500, fontSize: 13 }}>Rs. {item.price?.toLocaleString()}</td>
+                    <td><span className="admin-status-badge">Active</span></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                        <button
+                          className="admin-action-btn"
+                          style={{ color: '#8B7355', borderColor: '#DDD6CE' }}
+                          onClick={() => navigate(`/admin/edit/${item._id}`)}
+                        >Edit</button>
+                        <button
+                          className="admin-action-btn"
+                          style={{ color: '#EF4444', borderColor: '#FECACA' }}
+                          onClick={() => handleDelete(item._id)}
+                        >Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   )
 }
 
