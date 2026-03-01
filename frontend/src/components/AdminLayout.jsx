@@ -19,6 +19,10 @@ const NAV_ITEMS = [
     url: '/admin/designs', label: 'Manage Designs',
     icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="10" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/></svg>,
   },
+  {
+    url: '/catalog', label: 'Catalog',
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+  },
 ]
 
 export function AdminLayout({ title, children }) {
