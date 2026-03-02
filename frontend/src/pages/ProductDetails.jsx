@@ -235,7 +235,8 @@ const ProductDetails = () => {
                   state: { 
                     productName: item.name, 
                     price: item.price, 
-                    image: item.modelPath 
+                    image: item.imagePath,
+                    category: item.category,
                   } 
                 })}
               >
