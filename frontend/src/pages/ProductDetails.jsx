@@ -229,7 +229,18 @@ const ProductDetails = () => {
             {/* CTA */}
             <div className="pd-actions">
               <button className="pd-btn-primary">Add to Design</button>
-              <button className="pd-btn-outline">Buy Now</button>
+              <button
+                className="pd-btn-outline"
+                onClick={() => navigate(`/payment/${item._id}`, { 
+                  state: { 
+                    productName: item.name, 
+                    price: item.price, 
+                    image: item.modelPath 
+                  } 
+                })}
+              >
+                Buy Now
+              </button>
             </div>
           </div>
         </div>
