@@ -1,5 +1,5 @@
 import './App.css'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 import Login from './pages/login.jsx'
 import Register from './pages/register.jsx'
@@ -50,6 +50,7 @@ function App() {
           <Route path="/admin/edit/:id" element={<EditFurniture />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin/catalog" element={<AdminCatalog />} />
+          <Route path="/admin/designs" element={<Navigate to="/designer" replace />} />
      <Route path="/purchase-history" element={<PurchaseHistory />} /> {/* ✅ NEW ROUTE */}
 
 
