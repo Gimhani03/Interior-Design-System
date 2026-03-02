@@ -8,6 +8,7 @@ const furnitureRoutes = require('./routes/furnitureRoutes');
 
 const userRoutes = require('./routes/user');
 const orderRoutes = require('./routes/orderRoutes');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/furniture', furnitureRoutes);
 
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
