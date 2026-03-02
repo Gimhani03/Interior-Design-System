@@ -6,9 +6,9 @@ const TrendUpIcon = () => (
   </svg>
 )
 
-export function SectionCards({ userCount = 0, furnitureCount = 0 }) {
+export function SectionCards({ userCount = 0, furnitureCount = 0, totalRevenue = 0 }) {
   const cards = [
-    { label: 'Total Revenue', value: 'Rs. 1,234,000', badge: '+12.5%', footer: 'Trending up this month', sub: 'Revenue for the last 6 months' },
+    { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, badge: null, footer: 'From all orders', sub: 'Total sales revenue', showFooterIcon: false },
     { label: 'Registered Users', value: userCount.toLocaleString(), badge: '+8%', footer: 'Growing steadily', sub: 'Total active user accounts' },
     { label: 'Furniture Items', value: furnitureCount.toLocaleString(), badge: '+3', footer: 'Catalog expanding', sub: 'Products listed in the system' },
     { label: 'Growth Rate', value: '4.5%', badge: '+4.5%', footer: 'Steady performance', sub: 'Meets growth projections' },
@@ -20,12 +20,12 @@ export function SectionCards({ userCount = 0, furnitureCount = 0 }) {
         <div key={card.label} className="admin-stat-card">
           <div className="admin-stat-top">
             <span className="admin-stat-label">{card.label}</span>
-            <span className="admin-stat-badge"><TrendUpIcon />{card.badge}</span>
+            {card.badge != null && <span className="admin-stat-badge"><TrendUpIcon />{card.badge}</span>}
           </div>
           <div className="admin-stat-value">{card.value}</div>
           <div className="admin-stat-footer">
             <div className="admin-stat-footer-main">
-              {card.footer} <TrendUpIcon />
+              {card.footer}{card.showFooterIcon !== false && <> <TrendUpIcon /></>}
             </div>
             <div className="admin-stat-footer-sub">{card.sub}</div>
           </div>

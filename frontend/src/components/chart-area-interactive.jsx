@@ -1,22 +1,12 @@
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { useIsMobile } from "@/hooks/use-mobile"
+import API from "@/services/api"
 import '../pages/AdminDashboard.css'
 
-const chartData = [
-  { date: "Apr 1", users: 12, sales: 5 },
-  { date: "Apr 8", users: 18, sales: 9 },
-  { date: "Apr 15", users: 22, sales: 14 },
-  { date: "Apr 22", users: 19, sales: 11 },
-  { date: "Apr 29", users: 27, sales: 18 },
-  { date: "May 6", users: 31, sales: 22 },
-  { date: "May 13", users: 24, sales: 16 },
-  { date: "May 20", users: 35, sales: 25 },
-  { date: "May 27", users: 40, sales: 30 },
-  { date: "Jun 3", users: 38, sales: 28 },
-  { date: "Jun 10", users: 45, sales: 34 },
-  { date: "Jun 17", users: 52, sales: 41 },
-  { date: "Jun 24", users: 48, sales: 37 },
+const FALLBACK_DATA = [
+  { date: "—", users: 0, sales: 0 },
+  { date: "—", users: 0, sales: 0 },
 ]
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -37,13 +27,34 @@ const CustomTooltip = ({ active, payload, label }) => {
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("90d")
+  const [chartData, setChartData] = React.useState([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState(null)
 
   React.useEffect(() => {
     if (isMobile) setTimeRange("30d")
   }, [isMobile])
 
-  const count = timeRange === "7d" ? 3 : timeRange === "30d" ? 5 : chartData.length
-  const filteredData = chartData.slice(-count)
+  React.useEffect(() => {
+    const fetchActivity = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const { data } = await API.get('/admin/activity')
+        setChartData(data.data || [])
+      } catch (err) {
+        setError(err?.response?.data?.message || 'Failed to load activity')
+        setChartData(FALLBACK_DATA)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchActivity()
+  }, [])
+
+  const data = chartData?.length ? chartData : FALLBACK_DATA
+  const count = timeRange === "7d" ? 2 : timeRange === "30d" ? 5 : data.length
+  const filteredData = data.slice(-count)
 
   return (
     <div className="admin-chart-card">
@@ -71,7 +82,17 @@ export function ChartAreaInteractive() {
           </select>
         )}
       </div>
-      <div className="admin-chart-body">
+      <div className="admin-chart-body" style={{ position: 'relative' }}>
+        {loading && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.8)', zIndex: 10, borderRadius: 12 }}>
+            <span style={{ color: '#8B7355', fontSize: 14 }}>Loading activity…</span>
+          </div>
+        )}
+        {error && !loading && (
+          <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#FEE2E2', color: '#B91C1C', padding: '6px 12px', borderRadius: 8, fontSize: 12, zIndex: 10 }}>
+            {error}
+          </div>
+        )}
         <ResponsiveContainer width="100%" height={250}>
           <AreaChart data={filteredData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>

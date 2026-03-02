@@ -34,6 +34,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [furniture, setFurniture] = useState([])
   const [userCount, setUserCount] = useState(0)
+  const [totalRevenue, setTotalRevenue] = useState(0)
 
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
   const initials = storedUser.name
@@ -49,13 +50,14 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchFurniture()
-    const fetchUsers = async () => {
+    const fetchStats = async () => {
       try {
-        const res = await API.get('/users')
-        setUserCount(res.data.length)
+        const { data } = await API.get('/admin/stats')
+        setUserCount(data.userCount ?? 0)
+        setTotalRevenue(data.totalRevenue ?? 0)
       } catch (_) {}
     }
-    fetchUsers()
+    fetchStats()
   }, [])
 
   const handleDelete = async (id) => {
@@ -124,7 +126,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-content">
-          <SectionCards userCount={userCount} furnitureCount={furniture.length} />
+          <SectionCards userCount={userCount} furnitureCount={furniture.length} totalRevenue={totalRevenue} />
           <ChartAreaInteractive />
           <DataTable data={furniture} onDelete={handleDelete} />
         </div>
