@@ -6,6 +6,56 @@ import { SectionCards } from '@/components/section-cards'
 import { ChartAreaInteractive } from '@/components/chart-area-interactive'
 import { DataTable } from '@/components/data-table'
 import './AdminDashboard.css'
+import './Dashboard.css'
+
+const PlusIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+)
+
+const FolderIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </svg>
+)
+
+const BoxIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+  </svg>
+)
+
+const ChevronLeftIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+)
+
+const ChevronRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>
+)
+
+const LayoutIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+  </svg>
+)
+
+const recentDesigns = [
+  { id: 1, title: 'Living Room Layout', lastEdited: 'Today', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80', tag: 'Living Room' },
+  { id: 2, title: 'Bedroom Design', lastEdited: 'Yesterday', image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=400&q=80', tag: 'Bedroom' },
+  { id: 3, title: 'Modern Apartment', lastEdited: '4 days ago', image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=400&q=80', tag: 'Apartment' },
+]
+
+const quickActionsNoPurchaseHistory = [
+  { icon: <PlusIcon />, title: 'New Layout', desc: 'Start designing a room from scratch', btn: 'Create Layout', primary: true, path: '/designer' },
+  { icon: <FolderIcon />, title: 'My Designs', desc: 'Browse and manage saved layouts', btn: 'Open Designs', primary: false, path: '/designer' },
+  { icon: <BoxIcon />, title: '3D Viewer', desc: 'Explore your project in 3D space', btn: 'Launch Viewer', primary: false, path: '/designer' },
+]
 
 const NAV_ITEMS = [
   {
@@ -35,6 +85,7 @@ export default function AdminDashboard() {
   const [furniture, setFurniture] = useState([])
   const [userCount, setUserCount] = useState(0)
   const [totalRevenue, setTotalRevenue] = useState(0)
+  const [designIdx, setDesignIdx] = useState(0)
 
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
   const initials = storedUser.name
@@ -126,8 +177,97 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-content">
+          {/* ── Quick Actions (customer features, no Purchase History) ── */}
+          <section className="db-section">
+            <h2 className="db-section-title">Quick Actions</h2>
+            <div className="db-actions-grid">
+              {quickActionsNoPurchaseHistory.map((action, i) => (
+                <div key={i} className={`db-action-card${action.primary ? ' db-action-card--primary' : ''}`}>
+                  <div className="db-action-icon">{action.icon}</div>
+                  <div className="db-action-body">
+                    <p className="db-action-title">{action.title}</p>
+                    <p className="db-action-desc">{action.desc}</p>
+                  </div>
+                  <button
+                    className={action.primary ? 'db-btn-primary' : 'db-btn-outline'}
+                    onClick={() => action.path && navigate(action.path)}
+                  >
+                    {action.btn}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── Admin Stats ── */}
           <SectionCards userCount={userCount} furnitureCount={furniture.length} totalRevenue={totalRevenue} />
           <ChartAreaInteractive />
+
+          {/* ── Recent Designs (customer feature) ── */}
+          <section className="db-section">
+            <div className="db-section-header">
+              <h2 className="db-section-title">Recent Designs</h2>
+              <div className="db-nav-btns">
+                <button
+                  className="db-nav-btn"
+                  disabled={designIdx === 0}
+                  onClick={() => setDesignIdx(i => Math.max(0, i - 1))}
+                  aria-label="Previous"
+                >
+                  <ChevronLeftIcon />
+                </button>
+                <button
+                  className="db-nav-btn"
+                  disabled={designIdx + 2 >= recentDesigns.length}
+                  onClick={() => setDesignIdx(i => Math.min(recentDesigns.length - 2, i + 1))}
+                  aria-label="Next"
+                >
+                  <ChevronRightIcon />
+                </button>
+              </div>
+            </div>
+
+            <div className="db-designs-grid">
+              {recentDesigns.slice(designIdx, designIdx + 2).map(design => (
+                <div key={design.id} className="db-design-card">
+                  <div className="db-design-img-wrap">
+                    <img src={design.image} alt={design.title} className="db-design-img" />
+                    <span className="db-design-tag">{design.tag}</span>
+                  </div>
+                  <div className="db-design-body">
+                    <p className="db-design-title">{design.title}</p>
+                    <p className="db-design-meta">Last edited: {design.lastEdited}</p>
+                    <button className="db-btn-outline db-design-btn" onClick={() => navigate('/designer')}>Continue Editing</button>
+                  </div>
+                </div>
+              ))}
+
+              <div className="db-stats-card">
+                <div className="db-stats-row">
+                  <div className="db-stat">
+                    <span className="db-stat-value">12</span>
+                    <span className="db-stat-label">Total Designs</span>
+                  </div>
+                  <div className="db-stat-divider" />
+                  <div className="db-stat">
+                    <span className="db-stat-value">8</span>
+                    <span className="db-stat-label">Saved Items</span>
+                  </div>
+                  <div className="db-stat-divider" />
+                  <div className="db-stat">
+                    <span className="db-stat-value">3</span>
+                    <span className="db-stat-label">In Progress</span>
+                  </div>
+                </div>
+                <hr className="db-stats-divider" />
+                <div className="db-stats-footer">
+                  <LayoutIcon />
+                  <span>Last edited: <strong>Living Room</strong></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <DataTable data={furniture} onDelete={handleDelete} />
         </div>
       </main>
