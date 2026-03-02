@@ -1,150 +1,239 @@
-// Dashboard.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ For navigation
-import Navbar from '../components/Navbar'; 
-import './Dashboard.css';
-import { ChevronRight, Layout, Plus, Folder, Box, CheckCircle, Wallet } from 'lucide-react';
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
+import './Dashboard.css'
+
+const LayoutIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+  </svg>
+)
+
+const PlusIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+)
+
+const FolderIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </svg>
+)
+
+const BoxIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+  </svg>
+)
+
+const WalletIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+  </svg>
+)
+
+const ChevronRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>
+)
+
+const ChevronLeftIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+)
+
+const SparkleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3l1.5 5h5l-4 3 1.5 5-4-3-4 3 1.5-5-4-3h5z"/>
+  </svg>
+)
+
+const recentDesigns = [
+  { id: 1, title: 'Living Room Layout', lastEdited: 'Today', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80', tag: 'Living Room' },
+  { id: 2, title: 'Bedroom Design', lastEdited: 'Yesterday', image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=400&q=80', tag: 'Bedroom' },
+  { id: 3, title: 'Modern Apartment', lastEdited: '4 days ago', image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=400&q=80', tag: 'Apartment' },
+]
+
+const quickActions = [
+  {
+    icon: <PlusIcon />,
+    title: 'New Layout',
+    desc: 'Start designing a room from scratch',
+    btn: 'Create Layout',
+    primary: true,
+    path: null,
+  },
+  {
+    icon: <WalletIcon />,
+    title: 'Purchase History',
+    desc: 'View your past orders & receipts',
+    btn: 'View History',
+    primary: false,
+    path: '/purchase-history',
+  },
+  {
+    icon: <FolderIcon />,
+    title: 'My Designs',
+    desc: 'Browse and manage saved layouts',
+    btn: 'Open Designs',
+    primary: false,
+    path: null,
+  },
+  {
+    icon: <BoxIcon />,
+    title: '3D Viewer',
+    desc: 'Explore your project in 3D space',
+    btn: 'Launch Viewer',
+    primary: false,
+    path: null,
+  },
+]
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // ✅ Initialize navigate
-  const [userName, setUserName] = useState('Guest');
+  const navigate = useNavigate()
+  const [userName, setUserName] = useState('Guest')
+  const [designIdx, setDesignIdx] = useState(0)
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem('user')
     if (storedUser) {
       try {
-        const userObj = JSON.parse(storedUser);
-        setUserName(userObj.name || 'User');
-      } catch (error) {
-        console.error("Error parsing user data:", error);
+        const userObj = JSON.parse(storedUser)
+        setUserName(userObj.name || 'User')
+      } catch {
+        // ignore
       }
     }
-  }, []);
+  }, [])
 
-  const recentDesigns = [
-    { id: 1, title: "Living Room Layout", lastEdited: "Today", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80" },
-    { id: 2, title: "Bedroom Design", lastEdited: "Yesterday", image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=400&q=80" },
-    { id: 3, title: "Modern Apartment", lastEdited: "4 days ago", image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=400&q=80" },
-  ];
+  const initials = userName
+    ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U'
+
+  const visibleDesigns = recentDesigns.slice(designIdx, designIdx + 2)
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="db-page">
       <Navbar />
-      <main className="dashboard-content">
-        {/* Welcome Header */}
-        <header className="welcome-section">
-          <h1>Welcome back, {userName} 👋</h1>
-          <p>Here's what's happening with your designs today.</p>
-        </header>
 
-        {/* Action Grid */}
-        <div className="action-grid">
-          <ActionCard 
-            icon={<Plus size={20} />} 
-            title="Create New Layout" 
-            desc="Start designing room" 
-            btnText="Create New Layout" 
-            variant="primary" 
-          />
+      <div className="db-content">
 
-          {/* ✅ Purchase History navigates to /purchase-history */}
-          <ActionCard 
-            icon={<Wallet size={20} color="#3b82f6" />} 
-            title="Purchase History" 
-            desc="View your past purchases" 
-            btnText="View Purchase History" 
-            onClick={() => navigate('/purchase-history')}
-          />
+        {/* ── Hero Welcome ── */}
+        <section className="db-hero">
+          <div className="db-hero-inner">
+            <div className="db-hero-text">
+              <div className="db-hero-label">
+                <SparkleIcon /> Your workspace
+              </div>
+              <h1 className="db-hero-title">Welcome back, {userName}</h1>
+              <p className="db-hero-sub">
+                Pick up where you left off or start something new today.
+              </p>
+              <button className="db-hero-btn" onClick={() => navigate('/catalog')}>
+                Browse Catalog <ChevronRightIcon />
+              </button>
+            </div>
+            <div className="db-hero-avatar">{initials}</div>
+          </div>
+        </section>
 
-          <ActionCard 
-            icon={<Folder size={20} color="#3b82f6" />} 
-            title="My Designs" 
-            desc="View saved layouts" 
-            btnText="View saved layouts" 
-          />
-          <ActionCard 
-            icon={<Box size={20} color="#6366f1" />} 
-            title="Open 3D Viewer" 
-            desc="View last project" 
-            btnText="View saved layouts" 
-            showArrow 
-          />
-        </div>
+        {/* ── Quick Actions ── */}
+        <section className="db-section">
+          <h2 className="db-section-title">Quick Actions</h2>
+          <div className="db-actions-grid">
+            {quickActions.map((action, i) => (
+              <div key={i} className={`db-action-card${action.primary ? ' db-action-card--primary' : ''}`}>
+                <div className="db-action-icon">{action.icon}</div>
+                <div className="db-action-body">
+                  <p className="db-action-title">{action.title}</p>
+                  <p className="db-action-desc">{action.desc}</p>
+                </div>
+                <button
+                  className={action.primary ? 'db-btn-primary' : 'db-btn-outline'}
+                  onClick={() => action.path && navigate(action.path)}
+                >
+                  {action.btn}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {/* Recent Designs */}
-        <section className="section-container">
-          <div className="section-header">
-            <h2>Recent Designs</h2>
-            <div className="nav-arrows">
-              <button><ChevronRight className="rotate-180" size={16}/></button>
-              <button><ChevronRight size={16}/></button>
+        {/* ── Recent Designs ── */}
+        <section className="db-section">
+          <div className="db-section-header">
+            <h2 className="db-section-title">Recent Designs</h2>
+            <div className="db-nav-btns">
+              <button
+                className="db-nav-btn"
+                disabled={designIdx === 0}
+                onClick={() => setDesignIdx(i => Math.max(0, i - 1))}
+                aria-label="Previous"
+              >
+                <ChevronLeftIcon />
+              </button>
+              <button
+                className="db-nav-btn"
+                disabled={designIdx + 2 >= recentDesigns.length}
+                onClick={() => setDesignIdx(i => Math.min(recentDesigns.length - 2, i + 1))}
+                aria-label="Next"
+              >
+                <ChevronRightIcon />
+              </button>
             </div>
           </div>
 
-          <div className="design-grid">
-            {recentDesigns.map((design) => (
-              <div key={design.id} className="design-card">
-                <img src={design.image} alt={design.title} />
-                <div className="design-card-info">
-                  <h3>{design.title}</h3>
-                  <p>Last edited: {design.lastEdited}</p>
-                  <button className="btn-outline">Continue Editing</button>
+          <div className="db-designs-grid">
+            {visibleDesigns.map(design => (
+              <div key={design.id} className="db-design-card">
+                <div className="db-design-img-wrap">
+                  <img src={design.image} alt={design.title} className="db-design-img" />
+                  <span className="db-design-tag">{design.tag}</span>
+                </div>
+                <div className="db-design-body">
+                  <p className="db-design-title">{design.title}</p>
+                  <p className="db-design-meta">Last edited: {design.lastEdited}</p>
+                  <button className="db-btn-outline db-design-btn">Continue Editing</button>
                 </div>
               </div>
             ))}
 
-            {/* Design Capacity Card */}
-            <div className="stats-card-highlight">
-              <div className="badge-icon"><CheckCircle size={18} /> 12 | 12</div>
-              <p className="stats-label text-bold">Total Designs</p>
-              <div className="stats-subtext"><Layout size={14} /> Living Room</div>
+            {/* Stats summary card */}
+            <div className="db-stats-card">
+              <div className="db-stats-row">
+                <div className="db-stat">
+                  <span className="db-stat-value">12</span>
+                  <span className="db-stat-label">Total Designs</span>
+                </div>
+                <div className="db-stat-divider" />
+                <div className="db-stat">
+                  <span className="db-stat-value">8</span>
+                  <span className="db-stat-label">Saved Items</span>
+                </div>
+                <div className="db-stat-divider" />
+                <div className="db-stat">
+                  <span className="db-stat-value">3</span>
+                  <span className="db-stat-label">In Progress</span>
+                </div>
+              </div>
+              <hr className="db-stats-divider" />
+              <div className="db-stats-footer">
+                <LayoutIcon />
+                <span>Last edited: <strong>Living Room</strong></span>
+              </div>
             </div>
           </div>
         </section>
+        
 
-        {/* Footer Info Area */}
-        <footer className="dashboard-footer-stats">
-          <div className="tip-box">
-            <div className="tip-header"></div>
-          </div>
-
-          <div className="stats-row">
-            <div className="stat-item">
-              <span className="stat-value">12</span>
-              <span className="stat-caption">Total Designs</span>
-            </div>
-            <div className="stat-item border-x">
-              <Layout size={24} color="#9ca3af" />
-              <span className="stat-caption">Last Edited<br/>Living Room</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">8</span>
-              <span className="stat-caption">Saved Items</span>
-            </div>
-          </div>
-        </footer>
-      </main>
-    </div>
-  );
-};
-
-// ✅ Updated ActionCard to accept onClick
-const ActionCard = ({ icon, title, desc, btnText, variant, showArrow, onClick }) => (
-  <div className={`action-card ${variant === 'primary' ? 'active-card' : ''}`}>
-    <div className="action-card-top">
-      <div className="icon-wrapper">{icon}</div>
-      <div className="action-text">
-        <h3>{title}</h3>
-        <p>{desc}</p>
       </div>
     </div>
-    <button
-      className={variant === 'primary' ? 'btn-action-primary' : 'btn-action-secondary'}
-      onClick={onClick} // ✅ Handle button click
-    >
-      {btnText} {showArrow && <ChevronRight size={14} />}
-    </button>
-  </div>
-);
+  )
+}
 
-export default Dashboard;
+export default Dashboard
