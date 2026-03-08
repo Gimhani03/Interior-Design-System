@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import Navbar from '../components/Navbar'
 import './Dashboard.css'
 
@@ -97,6 +98,8 @@ const quickActions = [
 const Dashboard = () => {
   const navigate = useNavigate()
   const [userName, setUserName] = useState('Guest')
+  const [designs, setDesigns] = useState([])
+  const [loading, setLoading] = useState(true)
   const [designIdx, setDesignIdx] = useState(0)
 
   useEffect(() => {
@@ -105,9 +108,23 @@ const Dashboard = () => {
       try {
         const userObj = JSON.parse(storedUser)
         setUserName(userObj.name || 'User')
+
+        // Fetch real designs for this user
+        const userId = userObj.id || userObj._id;
+        axios.get(`http://localhost:5001/api/designs/user/${userId}`)
+          .then(res => {
+            setDesigns(res.data)
+            setLoading(false)
+          })
+          .catch(err => {
+            console.error("Dashboard fetch error:", err)
+            setLoading(false)
+          })
       } catch {
-        // ignore
+        setLoading(false)
       }
+    } else {
+      setLoading(false)
     }
   }, [])
 
@@ -115,7 +132,17 @@ const Dashboard = () => {
     ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : 'U'
 
-  const visibleDesigns = recentDesigns.slice(designIdx, designIdx + 2)
+  // Use real designs if available, otherwise fallback to placeholders
+  const displayDesigns = designs.length > 0 ? designs : recentDesigns
+  const visibleDesigns = displayDesigns.slice(designIdx, designIdx + 2)
+
+  // Real Stats
+  const totalDesignsCount = designs.length
+  // For "Saved Items" vs "In Progress", we can use thumbnail presence as a proxy 
+  // or just show total if no other logic exists.
+  const savedItemsCount = designs.filter(d => d.thumbnail).length
+  const inProgressCount = designs.length - savedItemsCount
+  const lastEditedName = designs.length > 0 ? (designs[0].name || 'Untitled') : 'None'
 
   return (
     <div className="db-page">
@@ -179,8 +206,8 @@ const Dashboard = () => {
               </button>
               <button
                 className="db-nav-btn"
-                disabled={designIdx + 2 >= recentDesigns.length}
-                onClick={() => setDesignIdx(i => Math.min(recentDesigns.length - 2, i + 1))}
+                disabled={designIdx + 2 >= displayDesigns.length}
+                onClick={() => setDesignIdx(i => Math.min(displayDesigns.length - 2, i + 1))}
                 aria-label="Next"
               >
                 <ChevronRightIcon />
@@ -190,46 +217,47 @@ const Dashboard = () => {
 
           <div className="db-designs-grid">
             {visibleDesigns.map(design => (
-              <div key={design.id} className="db-design-card">
+              <div key={design._id || design.id} className="db-design-card">
                 <div className="db-design-img-wrap">
-                  <img src={design.image} alt={design.title} className="db-design-img" />
-                  <span className="db-design-tag">{design.tag}</span>
+                  <img src={design.thumbnail || design.image} alt={design.name || design.title} className="db-design-img" style={{ objectFit: design.thumbnail ? 'contain' : 'cover' }} />
+                  <span className="db-design-tag">{design.tag || '2D Layout'}</span>
                 </div>
                 <div className="db-design-body">
-                  <p className="db-design-title">{design.title}</p>
-                  <p className="db-design-meta">Last edited: {design.lastEdited}</p>
+                  <p className="db-design-title">{design.name || design.title}</p>
+                  <p className="db-design-meta">
+                    {design.lastEdited ? `Last edited: ${new Date(design.lastEdited).toLocaleDateString()}` : `Last edited: ${design.lastEdited}`}
+                  </p>
                   <button className="db-btn-outline db-design-btn" onClick={() => navigate('/viewer')}>Continue Editing</button>
                 </div>
               </div>
             ))}
 
-            {/* Stats summary card */}
+            {/* Real stats card */}
             <div className="db-stats-card">
               <div className="db-stats-row">
                 <div className="db-stat">
-                  <span className="db-stat-value">12</span>
+                  <span className="db-stat-value">{totalDesignsCount}</span>
                   <span className="db-stat-label">Total Designs</span>
                 </div>
                 <div className="db-stat-divider" />
                 <div className="db-stat">
-                  <span className="db-stat-value">8</span>
+                  <span className="db-stat-value">{savedItemsCount}</span>
                   <span className="db-stat-label">Saved Items</span>
                 </div>
                 <div className="db-stat-divider" />
                 <div className="db-stat">
-                  <span className="db-stat-value">3</span>
+                  <span className="db-stat-value">{inProgressCount}</span>
                   <span className="db-stat-label">In Progress</span>
                 </div>
               </div>
               <hr className="db-stats-divider" />
               <div className="db-stats-footer">
                 <LayoutIcon />
-                <span>Last edited: <strong>Living Room</strong></span>
+                <span>Last edited: <strong>{lastEditedName}</strong></span>
               </div>
             </div>
           </div>
         </section>
-
 
       </div>
     </div>
