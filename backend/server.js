@@ -9,6 +9,8 @@ const furnitureRoutes = require('./routes/furnitureRoutes');
 const userRoutes = require('./routes/user');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/admin');
+const designRoutes = require('./routes/designRoutes');
+
 
 const app = express();
 
@@ -16,8 +18,15 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL }));
-app.use(express.json());
+app.use(cors()); // Permissive CORS for dev debugging
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Global Logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -27,10 +36,18 @@ app.use('/api/furniture', furnitureRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/designs', designRoutes);
+
 
 // Test Route
 app.get('/', (req, res) => {
   res.json({ message: 'Interior Design System API is running!' });
+});
+
+// Catch-all for 404
+app.use((req, res) => {
+  console.log(`[404] NOT FOUND: ${req.method} ${req.url}`);
+  res.status(404).json({ message: `Route ${req.url} not found on this server.` });
 });
 
 // Start Server

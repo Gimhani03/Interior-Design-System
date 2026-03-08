@@ -10,38 +10,38 @@ import './Dashboard.css'
 
 const PlusIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 )
 
 const FolderIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
   </svg>
 )
 
 const BoxIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
   </svg>
 )
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6"/>
+    <polyline points="15 18 9 12 15 6" />
   </svg>
 )
 
 const ChevronRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6"/>
+    <polyline points="9 18 15 12 9 6" />
   </svg>
 )
 
 const LayoutIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+    <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" />
   </svg>
 )
 
@@ -53,30 +53,30 @@ const recentDesigns = [
 
 const quickActionsNoPurchaseHistory = [
   { icon: <PlusIcon />, title: 'New Layout', desc: 'Start designing a room from scratch', btn: 'Create Layout', primary: true, path: '/designer' },
-  { icon: <FolderIcon />, title: 'My Designs', desc: 'Browse and manage saved layouts', btn: 'Open Designs', primary: false, path: '/designer' },
-  { icon: <BoxIcon />, title: '3D Viewer', desc: 'Explore your project in 3D space', btn: 'Launch Viewer', primary: false, path: '/designer' },
+  { icon: <FolderIcon />, title: 'My Designs', desc: 'Browse and manage saved layouts', btn: 'Open Designs', primary: false, path: '/my-designs' },
+  { icon: <BoxIcon />, title: '3D Viewer', desc: 'Explore your project in 3D space', btn: 'Launch Viewer', primary: false, path: '/viewer' },
 ]
 
 const NAV_ITEMS = [
   {
     url: '/admin-dashboard', label: 'Dashboard',
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>,
   },
   {
     url: '/admin/users', label: 'Manage Users',
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
   },
   {
     url: '/admin/furniture-management', label: 'Manage Furniture',
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 9V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4"/><path d="M2 11v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-7a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1Z"/><path d="M8 21v-4"/><path d="M16 21v-4"/></svg>,
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 9V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4" /><path d="M2 11v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-7a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1Z" /><path d="M8 21v-4" /><path d="M16 21v-4" /></svg>,
   },
   {
     url: '/admin/designs', label: 'Manage Designs',
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="10" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/></svg>,
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="6" height="18" rx="1" /><rect x="9" y="3" width="6" height="10" rx="1" /><rect x="16" y="3" width="6" height="6" rx="1" /></svg>,
   },
   {
     url: '/admin/catalog', label: 'Catalog',
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>,
   },
 ]
 
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
     try {
       const res = await axios.get('http://localhost:5001/api/furniture')
       setFurniture(res.data)
-    } catch (_) {}
+    } catch (_) { }
   }
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
         const { data } = await API.get('/admin/stats')
         setUserCount(data.userCount ?? 0)
         setTotalRevenue(data.totalRevenue ?? 0)
-      } catch (_) {}
+      } catch (_) { }
     }
     fetchStats()
   }, [])
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
         <div className="admin-sidebar-header">
           <div className="admin-sidebar-logo">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
           <div className="admin-sidebar-brand">
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
             </div>
             <button className="admin-sidebar-logout" onClick={e => { e.stopPropagation(); handleLogout() }} title="Log out">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
               </svg>
             </button>
           </div>
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                   <div className="db-design-body">
                     <p className="db-design-title">{design.title}</p>
                     <p className="db-design-meta">Last edited: {design.lastEdited}</p>
-                    <button className="db-btn-outline db-design-btn" onClick={() => navigate('/designer')}>Continue Editing</button>
+                    <button className="db-btn-outline db-design-btn" onClick={() => navigate('/viewer')}>Continue Editing</button>
                   </div>
                 </div>
               ))}

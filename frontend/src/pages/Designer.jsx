@@ -4,7 +4,7 @@ import {
   Search, ChevronDown, Trash2, Box, Undo2, Redo2,
   ZoomIn, ZoomOut, Hand, MousePointer2, Save, Download, Copy,
   Magnet, Maximize, Hammer, Sofa, Settings2, Palette,
-  Scissors, Link2, AlignJustify, EyeOff
+  Scissors, Link2, AlignJustify, EyeOff, CheckCircle, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -279,8 +279,16 @@ const Designer = () => {
   const [stageScale, setStageScale] = useState(1);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isPanningMode, setIsPanningMode] = useState(false);
+  const [currentDesignId, setCurrentDesignId] = useState(null);
+  const [designName, setDesignName] = useState('My Interior Design');
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const stageRef = useRef(null);
   const polyDragRef = useRef(null); // High-Precision Drag Anchor
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
+  };
 
   const furnitureOnFloor = history[historyStep] || [];
 
@@ -291,7 +299,26 @@ const Designer = () => {
         setDbFurniture(res.data);
       } catch (err) { }
     };
+
+    // Check for existing design to load
+    const loadDesignIfAny = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const designId = urlParams.get('id');
+      if (designId) {
+        try {
+          const res = await axios.get(`http://localhost:5001/api/designs/${designId}`);
+          const d = res.data;
+          setCurrentDesignId(d._id);
+          setDesignName(d.name);
+          setRoomSize(d.roomSize);
+          setHistory([d.furniture]);
+          setHistoryStep(0);
+        } catch (err) { console.error("Load failed", err); }
+      }
+    };
+
     fetchFurniture();
+    loadDesignIfAny();
   }, []);
 
   const applyPhysics = (items) => {
@@ -391,14 +418,63 @@ const Designer = () => {
   const handleUndo = () => { if (historyStep > 0) { setHistoryStep(historyStep - 1); setSelectedId(null); setWallMenu({ show: false, x: 0, y: 0, stageX: 0, stageY: 0, wall: null }); } };
   const handleRedo = () => { if (historyStep < history.length - 1) { setHistoryStep(historyStep + 1); setSelectedId(null); setWallMenu({ show: false, x: 0, y: 0, stageX: 0, stageY: 0, wall: null }); } };
 
-  const handleExportPNG = () => {
+  const handleSaveDesign = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    console.log("Current User from Storage:", user);
+    if (!user) {
+      alert("Please log in to save your designs.");
+      return;
+    }
+
+    const userId = user.id || user._id;
+    console.log("Extracted userId:", userId);
+
+    // Capture Thumbnail (Base64)
     setSelectedId(null);
     setWallMenu({ show: false, x: 0, y: 0, stageX: 0, stageY: 0, wall: null });
-    setTimeout(() => {
-      const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
-      const link = document.createElement('a'); link.download = 'FloorPlan_Export.png'; link.href = uri;
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }, 100);
+
+    const uiThumbnail = stageRef.current.toDataURL({ pixelRatio: 0.5 });
+
+    const payload = {
+      ...(currentDesignId && { id: currentDesignId }),
+      userId: userId,
+      name: designName,
+      roomSize: {
+        ...roomSize,
+        points: roomSize.points || [] // Ensure points is never undefined
+      },
+      furniture: (furnitureOnFloor || []).map(f => ({
+        clientId: f.id,
+        name: f.name,
+        type: f.type,
+        category: f.category,
+        image: f.image,
+        x: Math.round(f.x),
+        y: Math.round(f.y),
+        width: Math.round(f.width),
+        height: Math.round(f.height),
+        rotation: Math.round(f.rotation || 0),
+        modelHeight: Math.round(f.modelHeight || 75),
+        isStructural: !!f.isStructural,
+        swingLeft: !!f.swingLeft,
+        swingOut: !!f.swingOut
+      })),
+      thumbnail: uiThumbnail
+    };
+    console.log("Preparing Save Payload:", payload);
+
+    try {
+      const res = await axios.post('http://localhost:5001/api/designs', payload);
+      setCurrentDesignId(res.data._id);
+      setHasChanges(false);
+      showToast("Design saved successfully! You can find it in 'My Designs'.", "success");
+    } catch (err) {
+      console.error("Save Error:", err);
+      const serverData = err.response?.data;
+      const msg = serverData?.message || err.message;
+      const detail = serverData?.error ? ` (${serverData.error})` : "";
+      showToast(`Save failed: ${msg}${detail}`, "error");
+    }
   };
 
   const handleWheel = (e) => {
@@ -637,8 +713,16 @@ const Designer = () => {
           <button className={`icon-btn ${snapToGrid ? 'active' : ''}`} onClick={() => setSnapToGrid(!snapToGrid)}><Magnet size={18} color={snapToGrid ? THEME_BROWN : '#94a3b8'} /></button>
         </div>
         <div className="toolbar-group">
-          <button className="icon-btn" onClick={handleExportPNG}><Download size={18} style={{ marginRight: '5px' }} /> Export Plan</button>
-          <button className="btn-save-primary" disabled={!hasChanges}><Save size={18} /> Save Design</button>
+          <button className="icon-btn" onClick={() => {
+            setSelectedId(null);
+            setWallMenu({ show: false, x: 0, y: 0, stageX: 0, stageY: 0, wall: null });
+            setTimeout(() => {
+              const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+              const link = document.createElement('a'); link.download = 'FloorPlan_Export.png'; link.href = uri;
+              document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            }, 100);
+          }}><Download size={18} style={{ marginRight: '5px' }} /> Export Plan</button>
+          <button className="btn-save-primary" onClick={handleSaveDesign} disabled={!hasChanges}><Save size={18} /> Save Design</button>
         </div>
       </div>
 
@@ -1373,6 +1457,20 @@ const Designer = () => {
           </div>
         )}
 
+        {/* CUSTOM TOAST NOTIFICATION */}
+        {toast.show && (
+          <div style={{
+            position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+            background: toast.type === 'success' ? '#10B981' : '#EF4444',
+            color: 'white', padding: '12px 24px', borderRadius: '12px',
+            display: 'flex', alignItems: 'center', gap: '10px', zIndex: 10000,
+            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+            animation: 'toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          }}>
+            {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+            <span style={{ fontWeight: '600', fontSize: '14px' }}>{toast.message}</span>
+          </div>
+        )}
       </div>
     </div>
   );
