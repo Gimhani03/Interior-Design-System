@@ -21,6 +21,9 @@ import ManageUsers from './pages/ManageUsers.jsx'
 import AdminCatalog from './pages/AdminCatalog.jsx'
 import Payment from './pages/Payment.jsx'   // ✅ NEW IMPORT
 import PurchaseHistory from './pages/PurchaseHistory.jsx'; // ✅ NEW
+import MyDesigns from './pages/MyDesigns.jsx'; // ✅ NEW
+import Viewer3D from './pages/Viewer3D.jsx'; // ✅ NEW
+
 
 
 function App() {
@@ -41,17 +44,20 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/catalog" element={<FurnitureCatalog />} />
       <Route path="/designer" element={<Designer />} />
+      <Route path="/my-designs" element={<MyDesigns />} />
+      <Route path="/viewer" element={<Viewer3D />} />
+
       <Route path="/product/:id" element={<ProductDetails />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin/users" element={<ManageUsers />} />
-          <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
-          <Route path="/admin/add" element={<AddFurniture />} />
-          <Route path="/admin/edit/:id" element={<EditFurniture />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/catalog" element={<AdminCatalog />} />
-          <Route path="/admin/designs" element={<Navigate to="/designer" replace />} />
-     <Route path="/purchase-history" element={<PurchaseHistory />} /> {/* ✅ NEW ROUTE */}
+
+      {/* Admin routes */}
+      <Route path="/admin/users" element={<ManageUsers />} />
+      <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
+      <Route path="/admin/add" element={<AddFurniture />} />
+      <Route path="/admin/edit/:id" element={<EditFurniture />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/catalog" element={<AdminCatalog />} />
+      <Route path="/admin/designs" element={<MyDesigns />} />
+      <Route path="/purchase-history" element={<PurchaseHistory />} /> {/* ✅ NEW ROUTE */}
 
 
       {/* ✅ Payment Route (NEW) */}
