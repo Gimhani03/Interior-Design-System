@@ -1,13 +1,25 @@
 import React from 'react'
-import { SAMPLE_DESIGN_LAYOUTS } from '../data/designSamples'
+import { getDesignLayout } from '../data/designSamples'
 
 /**
  * Renders the actual 2D layout as a thumbnail for design cards.
- * Matches reference: grid floor, dimensions, furniture labels, room name/area.
+ * Uses getDesignLayout to show updated layouts when user has edited and saved.
  */
 const DesignThumbnail = ({ designId, className = '' }) => {
-  const layout = SAMPLE_DESIGN_LAYOUTS[designId]
+  const layout = getDesignLayout(designId)
   if (!layout) return null
+
+  // Use saved thumbnail if available (shows exact edited design)
+  if (layout.thumbnail) {
+    return (
+      <img
+        src={layout.thumbnail}
+        alt={layout.name}
+        className={className}
+        style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#F9F7F4' }}
+      />
+    )
+  }
 
   const { roomSize, furniture } = layout
   const wt = roomSize.wallThickness || 20
