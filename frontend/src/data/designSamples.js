@@ -128,3 +128,96 @@ export const SAMPLE_DESIGN_LAYOUTS = {
     ]
   }
 };
+
+/** Tag mapping for designs that don't use roomName as category */
+const TAG_OVERRIDE = { 3: 'Apartment' };
+
+/** Design list metadata derived from SAMPLE_DESIGN_LAYOUTS - used by Designs, AdminDesigns, ManageDesigns */
+export const SAMPLE_DESIGNS = Object.entries(SAMPLE_DESIGN_LAYOUTS).map(([id, layout]) => ({
+  id: Number(id),
+  title: layout.name,
+  tag: TAG_OVERRIDE[Number(id)] || layout.roomSize?.roomName || 'General',
+  lastEdited: 'Sample'
+}));
+
+const STORAGE_KEY = 'adminDesignOverrides';
+
+/** Get admin overrides from localStorage */
+export function getDesignOverrides() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      deletedIds: parsed.deletedIds || [],
+      updates: parsed.updates || {},
+      layouts: parsed.layouts || {}
+    };
+  } catch {
+    return { deletedIds: [], updates: {}, layouts: {} };
+  }
+}
+
+/** Save admin overrides to localStorage */
+export function setDesignOverrides(overrides) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+}
+
+/** Get the full designs list with admin overrides applied */
+export function getDesignsList() {
+  const overrides = getDesignOverrides();
+  return SAMPLE_DESIGNS
+    .filter(d => !overrides.deletedIds.includes(d.id))
+    .map(d => {
+      const upd = overrides.updates[d.id];
+      return upd ? { ...d, title: upd.title ?? d.title, tag: upd.tag ?? d.tag } : d;
+    });
+}
+
+/** Delete a design (admin) */
+export function deleteDesign(id) {
+  const overrides = getDesignOverrides();
+  if (!overrides.deletedIds.includes(id)) {
+    overrides.deletedIds.push(id);
+    setDesignOverrides(overrides);
+  }
+}
+
+/** Update design metadata (admin) */
+export function updateDesign(id, { title, tag }) {
+  const overrides = getDesignOverrides();
+  overrides.updates[id] = { ...overrides.updates[id], title, tag };
+  setDesignOverrides(overrides);
+}
+
+/** Get layout for a design (base + layout overrides). Used by Designer and DesignThumbnail. */
+export function getDesignLayout(id) {
+  const base = SAMPLE_DESIGN_LAYOUTS[id];
+  if (!base) return null;
+  const overrides = getDesignOverrides();
+  const layoutOverride = overrides.layouts[id];
+  if (!layoutOverride) return base;
+  return {
+    name: layoutOverride.name ?? base.name,
+    roomSize: { ...base.roomSize, ...layoutOverride.roomSize },
+    furniture: layoutOverride.furniture ?? base.furniture,
+    thumbnail: layoutOverride.thumbnail
+  };
+}
+
+/** Save layout override when user edits and saves a sample design in the Designer. */
+export function saveDesignLayout(id, { roomSize, furniture, thumbnail, name }) {
+  const overrides = getDesignOverrides();
+  overrides.layouts[id] = {
+    ...(overrides.layouts[id] || {}),
+    roomSize: roomSize || overrides.layouts[id]?.roomSize,
+    furniture: furniture || overrides.layouts[id]?.furniture,
+    thumbnail: thumbnail || overrides.layouts[id]?.thumbnail,
+    name: name || overrides.layouts[id]?.name
+  };
+  setDesignOverrides(overrides);
+}
+
+/** Reset all admin overrides (restore deleted, revert updates and layout changes) */
+export function resetDesignOverrides() {
+  setDesignOverrides({ deletedIds: [], updates: {}, layouts: {} });
+}
