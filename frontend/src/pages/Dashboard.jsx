@@ -102,31 +102,51 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [designIdx, setDesignIdx] = useState(0)
 
-  useEffect(() => {
+  const fetchDesigns = React.useCallback((showLoading = true) => {
     const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        const userObj = JSON.parse(storedUser)
-        setUserName(userObj.name || 'User')
-
-        // Fetch real designs for this user
-        const userId = userObj.id || userObj._id;
-        axios.get(`http://localhost:5001/api/designs/user/${userId}`)
-          .then(res => {
-            setDesigns(res.data)
-            setLoading(false)
-          })
-          .catch(err => {
-            console.error("Dashboard fetch error:", err)
-            setLoading(false)
-          })
-      } catch {
+    if (!storedUser) {
+      setLoading(false)
+      return
+    }
+    try {
+      const userObj = JSON.parse(storedUser)
+      setUserName(userObj.name || 'User')
+      const userId = userObj.id || userObj._id
+      if (!userId) {
         setLoading(false)
+        return
       }
-    } else {
+      if (showLoading) setLoading(true)
+      axios.get(`http://localhost:5001/api/designs/user/${userId}`)
+        .then(res => {
+          setDesigns(res.data || [])
+        })
+        .catch(err => {
+          console.error("Dashboard fetch error:", err)
+        })
+        .finally(() => setLoading(false))
+    } catch {
       setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    fetchDesigns(true)
+  }, [fetchDesigns])
+
+  // Refetch when user returns to this tab (e.g. after saving in Designer)
+  useEffect(() => {
+    const onFocus = () => fetchDesigns(false)
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [fetchDesigns])
+
+  // Refetch when a design is saved (Designer dispatches this event)
+  useEffect(() => {
+    const onDesignsUpdated = () => fetchDesigns(false)
+    window.addEventListener('designs-updated', onDesignsUpdated)
+    return () => window.removeEventListener('designs-updated', onDesignsUpdated)
+  }, [fetchDesigns])
 
   const initials = userName
     ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -216,21 +236,38 @@ const Dashboard = () => {
           </div>
 
           <div className="db-designs-grid">
-            {visibleDesigns.map(design => (
-              <div key={design._id || design.id} className="db-design-card">
-                <div className="db-design-img-wrap">
-                  <img src={design.thumbnail || design.image} alt={design.name || design.title} className="db-design-img" style={{ objectFit: design.thumbnail ? 'contain' : 'cover' }} />
-                  <span className="db-design-tag">{design.tag || '2D Layout'}</span>
+            {visibleDesigns.map(design => {
+              const isApiDesign = !!design._id
+              const openInDesigner = () => {
+                if (isApiDesign) {
+                  navigate(`/designer?id=${design._id}`)
+                } else {
+                  navigate('/designer', { state: { designId: design.id } })
+                }
+              }
+              return (
+                <div
+                  key={design._id || design.id}
+                  className="db-design-card"
+                  onClick={openInDesigner}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="db-design-img-wrap">
+                    <img src={design.thumbnail || design.image} alt={design.name || design.title} className="db-design-img" style={{ objectFit: design.thumbnail ? 'contain' : 'cover' }} />
+                    <span className="db-design-tag">{design.tag || '2D Layout'}</span>
+                  </div>
+                  <div className="db-design-body">
+                    <p className="db-design-title">{design.name || design.title}</p>
+                    <p className="db-design-meta">
+                      {design.lastEdited
+                        ? `Last edited: ${typeof design.lastEdited === 'number' || design.lastEdited instanceof Date ? new Date(design.lastEdited).toLocaleDateString() : design.lastEdited}`
+                        : 'Last edited: —'}
+                    </p>
+                    <button className="db-btn-outline db-design-btn" onClick={e => { e.stopPropagation(); openInDesigner() }}>Continue Editing</button>
+                  </div>
                 </div>
-                <div className="db-design-body">
-                  <p className="db-design-title">{design.name || design.title}</p>
-                  <p className="db-design-meta">
-                    {design.lastEdited ? `Last edited: ${new Date(design.lastEdited).toLocaleDateString()}` : `Last edited: ${design.lastEdited}`}
-                  </p>
-                  <button className="db-btn-outline db-design-btn" onClick={() => navigate('/viewer')}>Continue Editing</button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
 
             {/* Real stats card */}
             <div className="db-stats-card">
