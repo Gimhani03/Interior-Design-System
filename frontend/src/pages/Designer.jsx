@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Stage, Layer, Rect, Text, Line, Group, Circle } from 'react-konva';
-import { SAMPLE_DESIGN_LAYOUTS } from '../data/designSamples';
+import { getDesignLayout, saveDesignLayout } from '../data/designSamples';
 import {
   Search, ChevronDown, Trash2, Box, Undo2, Redo2,
   ZoomIn, ZoomOut, Hand, MousePointer2, Save, Download, Copy,
@@ -283,6 +283,7 @@ const Designer = () => {
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isPanningMode, setIsPanningMode] = useState(false);
   const [currentDesignId, setCurrentDesignId] = useState(null);
+  const [sampleDesignId, setSampleDesignId] = useState(null);
   const [designName, setDesignName] = useState('My Interior Design');
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const stageRef = useRef(null);
@@ -306,11 +307,12 @@ const Designer = () => {
     // Check for sample design from Designs page (2D format)
     const loadDesignIfAny = async () => {
       const state = location.state || {};
-      const sampleDesignId = state.designId;
-      const sampleLayout = sampleDesignId && SAMPLE_DESIGN_LAYOUTS[sampleDesignId];
+      const sid = state.designId;
+      const sampleLayout = sid && getDesignLayout(sid);
 
       if (sampleLayout) {
-        setDesignName(sampleLayout.name);
+        setSampleDesignId(sid);
+        setDesignName(state.title || sampleLayout.name);
         setRoomSize(sampleLayout.roomSize);
         setHistory([sampleLayout.furniture]);
         setHistoryStep(0);
@@ -436,49 +438,72 @@ const Designer = () => {
   const handleRedo = () => { if (historyStep < history.length - 1) { setHistoryStep(historyStep + 1); setSelectedId(null); setWallMenu({ show: false, x: 0, y: 0, stageX: 0, stageY: 0, wall: null }); } };
 
   const handleSaveDesign = async () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    console.log("Current User from Storage:", user);
-    if (!user) {
-      alert("Please log in to save your designs.");
-      return;
-    }
-
-    const userId = user.id || user._id;
-    console.log("Extracted userId:", userId);
-
     // Capture Thumbnail (Base64)
     setSelectedId(null);
     setWallMenu({ show: false, x: 0, y: 0, stageX: 0, stageY: 0, wall: null });
 
     const uiThumbnail = stageRef.current.toDataURL({ pixelRatio: 0.5 });
 
+    const layoutFurniture = (furnitureOnFloor || []).map(f => ({
+      id: f.id,
+      name: f.name,
+      type: f.type,
+      category: f.category,
+      image: f.image,
+      x: Math.round(f.x),
+      y: Math.round(f.y),
+      width: Math.round(f.width),
+      height: Math.round(f.height),
+      rotation: Math.round(f.rotation || 0),
+      modelHeight: Math.round(f.modelHeight || 75),
+      isStructural: !!f.isStructural,
+      swingLeft: !!f.swingLeft,
+      swingOut: !!f.swingOut
+    }));
+
+    // If editing a catalog design, always update the Designs section (works without login)
+    if (sampleDesignId) {
+      saveDesignLayout(sampleDesignId, {
+        roomSize: { ...roomSize, points: roomSize.points || [] },
+        furniture: layoutFurniture,
+        thumbnail: uiThumbnail,
+        name: designName
+      });
+      setHasChanges(false);
+      showToast("Design updated! Changes will appear in the Designs section.", "success");
+      window.dispatchEvent(new CustomEvent('designs-updated'));
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      if (!sampleDesignId) alert("Please log in to save your designs.");
+      return;
+    }
+
+    const userId = user.id || user._id;
     const payload = {
       ...(currentDesignId && { id: currentDesignId }),
-      userId: userId,
+      userId,
       name: designName,
-      roomSize: {
-        ...roomSize,
-        points: roomSize.points || [] // Ensure points is never undefined
-      },
-      furniture: (furnitureOnFloor || []).map(f => ({
+      roomSize: { ...roomSize, points: roomSize.points || [] },
+      furniture: layoutFurniture.map(f => ({
         clientId: f.id,
         name: f.name,
         type: f.type,
         category: f.category,
         image: f.image,
-        x: Math.round(f.x),
-        y: Math.round(f.y),
-        width: Math.round(f.width),
-        height: Math.round(f.height),
-        rotation: Math.round(f.rotation || 0),
-        modelHeight: Math.round(f.modelHeight || 75),
-        isStructural: !!f.isStructural,
-        swingLeft: !!f.swingLeft,
-        swingOut: !!f.swingOut
+        x: f.x,
+        y: f.y,
+        width: f.width,
+        height: f.height,
+        rotation: f.rotation,
+        modelHeight: f.modelHeight,
+        isStructural: f.isStructural,
+        swingLeft: f.swingLeft,
+        swingOut: f.swingOut
       })),
       thumbnail: uiThumbnail
     };
-    console.log("Preparing Save Payload:", payload);
 
     try {
       const res = await axios.post('http://localhost:5001/api/designs', payload);
