@@ -1,29 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import DesignThumbnail from '../components/DesignThumbnail'
+import { getDesignsList } from '../data/designSamples'
 import './FurnitureCatalog.css'
 import './Designs.css'
 
-const CATEGORIES = ['All', 'Living Room', 'Bedroom', 'Dining Room', 'Office', 'Kitchen', 'Apartment']
-
-const SAMPLE_DESIGNS = [
-  { id: 1, title: 'Living Room Layout', tag: 'Living Room', lastEdited: 'Today' },
-  { id: 2, title: 'Bedroom Design', tag: 'Bedroom', lastEdited: 'Yesterday' },
-  { id: 3, title: 'Modern Apartment', tag: 'Apartment', lastEdited: '4 days ago' },
-  { id: 4, title: 'Cozy Kitchen', tag: 'Kitchen', lastEdited: '1 week ago' },
-  { id: 5, title: 'Home Office', tag: 'Office', lastEdited: '2 weeks ago' },
-  { id: 6, title: 'Minimalist Lounge', tag: 'Living Room', lastEdited: '3 weeks ago' },
-  { id: 7, title: 'Elegant Dining Space', tag: 'Dining Room', lastEdited: '1 month ago' },
-  { id: 8, title: 'Master Suite', tag: 'Bedroom', lastEdited: '5 days ago' },
-]
+const CATEGORIES = ['All', 'Living Room', 'Bedroom', 'Dining Room', 'Office', 'Kitchen', 'Apartment', 'Open Plan', 'Lounge', 'Master Bedroom', 'General']
 
 const Designs = () => {
   const navigate = useNavigate()
+  const [designs, setDesigns] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
 
-  const filteredDesigns = SAMPLE_DESIGNS.filter(d => {
+  useEffect(() => {
+    const refresh = () => setDesigns(getDesignsList())
+    refresh()
+    window.addEventListener('designs-updated', refresh)
+    window.addEventListener('storage', refresh)
+    const onVisibilityChange = () => document.visibilityState === 'visible' && refresh()
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => {
+      window.removeEventListener('designs-updated', refresh)
+      window.removeEventListener('storage', refresh)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
+  }, [])
+
+  const filteredDesigns = designs.filter(d => {
     const matchesSearch = d.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (d.tag && d.tag.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesCategory = selectedCategory === 'All' || d.tag === selectedCategory
