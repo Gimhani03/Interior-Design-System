@@ -10,7 +10,6 @@ import Dashboard from './pages/Dashboard.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import Profile from './pages/Profile.jsx'
 import AboutUs from './pages/AboutUs.jsx'
-import Designer from './pages/Designer.jsx'
 import FurnitureCatalog from './pages/FurnitureCatalog'
 import ProductDetails from './pages/ProductDetails'
 import AdminDashboard from './pages/AdminDashboard.jsx'
@@ -18,12 +17,14 @@ import AddFurniture from './pages/AddFurniture'
 import EditFurniture from './pages/EditFurniture'
 import FurnitureManagement from './pages/FurnitureManagement.jsx'
 import ManageUsers from './pages/ManageUsers.jsx'
+import ManageDesigns from './pages/ManageDesigns.jsx'
 import AdminCatalog from './pages/AdminCatalog.jsx'
 import Payment from './pages/Payment.jsx'   // ✅ NEW IMPORT
 import PurchaseHistory from './pages/PurchaseHistory.jsx'; // ✅ NEW
 import MyDesigns from './pages/MyDesigns.jsx'; // ✅ NEW
 import Viewer3D from './pages/Viewer3D.jsx'; // ✅ NEW
-
+import Designs from './pages/Designs'
+import Designer from './pages/Designer'
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
       <Route path="/my-designs" element={<MyDesigns />} />
       <Route path="/viewer" element={<Viewer3D />} />
 
+      <Route path="/designs" element={<Designs />} />
       <Route path="/product/:id" element={<ProductDetails />} />
 
       {/* Admin routes */}
@@ -58,6 +60,16 @@ function App() {
       <Route path="/admin/catalog" element={<AdminCatalog />} />
       <Route path="/admin/designs" element={<MyDesigns />} />
       <Route path="/purchase-history" element={<PurchaseHistory />} /> {/* ✅ NEW ROUTE */}
+          
+          {/* Admin routes */}
+          <Route path="/admin/users" element={<ManageUsers />} />
+          <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
+          <Route path="/admin/add" element={<AddFurniture />} />
+          <Route path="/admin/edit/:id" element={<EditFurniture />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/catalog" element={<AdminCatalog />} />
+          <Route path="/admin/designs" element={<ManageDesigns />} />
+     <Route path="/purchase-history" element={<PurchaseHistory />} /> 
 
 
       {/* ✅ Payment Route (NEW) */}
