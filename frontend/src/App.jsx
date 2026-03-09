@@ -18,6 +18,7 @@ import EditFurniture from './pages/EditFurniture'
 import FurnitureManagement from './pages/FurnitureManagement.jsx'
 import ManageUsers from './pages/ManageUsers.jsx'
 import ManageDesigns from './pages/ManageDesigns.jsx'
+import AdminDesigns from './pages/AdminDesigns.jsx'
 import AdminCatalog from './pages/AdminCatalog.jsx'
 import Payment from './pages/Payment.jsx'   // ✅ NEW IMPORT
 import PurchaseHistory from './pages/PurchaseHistory.jsx'; // ✅ NEW
@@ -51,37 +52,19 @@ function App() {
       <Route path="/designs" element={<Designs />} />
       <Route path="/product/:id" element={<ProductDetails />} />
 
-      {/* Admin routes */}
-      <Route path="/admin/users" element={<ManageUsers />} />
-      <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
-      <Route path="/admin/add" element={<AddFurniture />} />
-      <Route path="/admin/edit/:id" element={<EditFurniture />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-      <Route path="/admin/catalog" element={<AdminCatalog />} />
-      <Route path="/admin/designs" element={<MyDesigns />} />
-      <Route path="/purchase-history" element={<PurchaseHistory />} /> {/* ✅ NEW ROUTE */}
-          
-          {/* Admin routes */}
-          <Route path="/admin/users" element={<ManageUsers />} />
-          <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
-          <Route path="/admin/add" element={<AddFurniture />} />
-          <Route path="/admin/edit/:id" element={<EditFurniture />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/catalog" element={<AdminCatalog />} />
-          <Route path="/admin/designs" element={<ManageDesigns />} />
-     <Route path="/purchase-history" element={<PurchaseHistory />} /> 
-
-
-      {/* ✅ Payment Route (NEW) */}
+      <Route path="/purchase-history" element={<PurchaseHistory />} />
       <Route path="/payment/:id" element={<Payment />} />
 
-      {/* Admin Routes */}
+      {/* Admin routes */}
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
       <Route path="/admin/users" element={<ManageUsers />} />
       <Route path="/admin/furniture-management" element={<FurnitureManagement />} />
       <Route path="/admin/add" element={<AddFurniture />} />
       <Route path="/admin/edit/:id" element={<EditFurniture />} />
+      <Route path="/admin/catalog" element={<AdminCatalog />} />
+      <Route path="/admin/designs" element={<AdminDesigns />} />
+      <Route path="/admin/manage-designs" element={<ManageDesigns />} />
 
     </Routes>
   )
