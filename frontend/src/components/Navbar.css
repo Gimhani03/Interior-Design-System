@@ -54,6 +54,7 @@
   color: #6B7280;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .nav-item:hover {

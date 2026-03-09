@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Pen, LayoutDashboard, Info } from 'lucide-react';
+import { Home, BookOpen, Pen, LayoutDashboard, Info, Palette } from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
 import './Navbar.css';
 
@@ -37,11 +37,13 @@ const Navbar = () => {
           { path: '/admin-dashboard', label: 'Home', icon: <LayoutDashboard size={20} /> },
           { path: '/about', label: 'About Us', icon: <Info size={20} /> },
           { path: '/catalog', label: 'Catalog', icon: <BookOpen size={20} /> },
+          { path: '/designs', label: 'Designs', icon: <Palette size={20} /> },
         ]
       : [
           { path: '/dashboard', label: 'Home', icon: <Home size={20} /> },
           { path: '/about', label: 'About Us', icon: <Info size={20} /> },
           { path: '/catalog', label: 'Catalog', icon: <BookOpen size={20} /> },
+          { path: '/designs', label: 'Designs', icon: <Palette size={20} /> },
         ];
   } else {
     navItems = [
