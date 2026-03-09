@@ -1,50 +1,59 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AdminLayout } from '../components/AdminLayout'
+import { getDesignsList, deleteDesign, getDesignOverrides, setDesignOverrides, resetDesignOverrides } from '../data/designSamples'
 import './AdminDashboard.css'
+
+const CATEGORIES = ['Living Room', 'Bedroom', 'Dining Room', 'Office', 'Kitchen', 'Apartment', 'Open Plan', 'Lounge', 'Master Bedroom', 'General']
 
 const ManageDesigns = () => {
   const navigate = useNavigate()
   const [designs, setDesigns] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
+  const [editingDesign, setEditingDesign] = useState(null)
+  const [editForm, setEditForm] = useState({ title: '', tag: '' })
+
+  const refreshDesigns = () => {
+    setDesigns(getDesignsList())
+  }
 
   useEffect(() => {
-    const fetchDesigns = async () => {
-      try {
-        const res = await fetch('/api/designs')
-        if (!res.ok) throw new Error('Failed to fetch designs')
-        const data = await res.json()
-        setDesigns(Array.isArray(data) ? data : data.designs || [])
-      } catch (err) {
-        setError(null)
-        setDesigns([
-          { id: 1, title: 'Living Room Layout', tag: 'Living Room', createdBy: 'Admin', lastEdited: 'Today' },
-          { id: 2, title: 'Bedroom Design', tag: 'Bedroom', createdBy: 'Admin', lastEdited: 'Yesterday' },
-          { id: 3, title: 'Modern Apartment', tag: 'Apartment', createdBy: 'Admin', lastEdited: '4 days ago' },
-        ])
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchDesigns()
+    refreshDesigns()
+    const handleStorage = () => refreshDesigns()
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
   const filtered = designs.filter(
     (d) =>
       d.title?.toLowerCase().includes(search.toLowerCase()) ||
-      d.tag?.toLowerCase().includes(search.toLowerCase()) ||
-      d.createdBy?.toLowerCase().includes(search.toLowerCase())
+      d.tag?.toLowerCase().includes(search.toLowerCase())
   )
 
   const handleEdit = (design) => {
-    navigate('/designer', { state: { designId: design.id } })
+    navigate('/designer', { state: { designId: design.id, title: design.title } })
+  }
+
+  const handleUpdate = (design) => {
+    setEditingDesign(design)
+    setEditForm({ title: design.title, tag: design.tag || '' })
+  }
+
+  const handleSaveUpdate = () => {
+    if (!editingDesign) return
+    const overrides = getDesignOverrides()
+    overrides.updates[editingDesign.id] = { title: editForm.title, tag: editForm.tag }
+    setDesignOverrides(overrides)
+    setEditingDesign(null)
+    refreshDesigns()
+    window.dispatchEvent(new CustomEvent('designs-updated'))
   }
 
   const handleDelete = (design) => {
-    if (window.confirm(`Delete "${design.title}"?`)) {
-      setDesigns((prev) => prev.filter((d) => d.id !== design.id))
+    if (window.confirm(`Delete "${design.title}"? This will remove it from the designs catalog.`)) {
+      deleteDesign(design.id)
+      refreshDesigns()
+      window.dispatchEvent(new CustomEvent('designs-updated'))
     }
   }
 
@@ -55,7 +64,7 @@ const ManageDesigns = () => {
           <div>
             <span className="admin-table-title">Design Directory</span>
             <p style={{ fontSize: 12, color: '#9CA3AF', margin: '2px 0 0' }}>
-              {loading ? 'Loading...' : `${filtered.length} design${filtered.length !== 1 ? 's' : ''} found`}
+              {filtered.length} design{filtered.length !== 1 ? 's' : ''} found
             </p>
           </div>
           <div className="admin-table-actions">
@@ -77,15 +86,26 @@ const ManageDesigns = () => {
               </svg>
               New Design
             </button>
+            {(getDesignOverrides().deletedIds?.length > 0 || Object.keys(getDesignOverrides().updates || {}).length > 0 || Object.keys(getDesignOverrides().layouts || {}).length > 0) && (
+              <button
+                className="admin-action-btn"
+                onClick={() => {
+                  if (window.confirm('Reset all design changes? This will restore deleted designs and revert metadata updates.')) {
+                    resetDesignOverrides()
+                    refreshDesigns()
+                    window.dispatchEvent(new CustomEvent('designs-updated'))
+                  }
+                }}
+                style={{ marginLeft: 8 }}
+              >
+                Reset to Default
+              </button>
+            )}
           </div>
         </div>
 
         <div className="admin-table-wrap">
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '48px 0', color: '#9CA3AF', fontSize: 14 }}>Loading designs…</div>
-          ) : error ? (
-            <div style={{ textAlign: 'center', padding: '48px 0', color: '#EF4444', fontSize: 14 }}>{error}</div>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 0', color: '#9CA3AF', fontSize: 14 }}>No designs found.</div>
           ) : (
             <table className="admin-table">
@@ -93,23 +113,22 @@ const ManageDesigns = () => {
                 <tr>
                   <th>Title</th>
                   <th>Category</th>
-                  <th>Created By</th>
                   <th>Last Edited</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((design) => (
-                  <tr key={design._id || design.id}>
+                  <tr key={design.id}>
                     <td style={{ fontWeight: 500 }}>{design.title}</td>
                     <td>
                       <span className="admin-cat-badge">{design.tag || '—'}</span>
                     </td>
-                    <td style={{ color: '#6B7280', fontSize: 13 }}>{design.createdBy || '—'}</td>
                     <td style={{ color: '#6B7280', fontSize: 13 }}>{design.lastEdited || '—'}</td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                         <button className="admin-action-btn edit" onClick={() => handleEdit(design)}>Edit</button>
+                        <button className="admin-action-btn edit" onClick={() => handleUpdate(design)}>Update</button>
                         <button className="admin-action-btn delete" onClick={() => handleDelete(design)}>Delete</button>
                       </div>
                     </td>
@@ -120,6 +139,47 @@ const ManageDesigns = () => {
           )}
         </div>
       </div>
+
+      {/* Update modal */}
+      {editingDesign && (
+        <div className="admin-modal-overlay" onClick={() => setEditingDesign(null)}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 18 }}>Update Design</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4, color: '#374151' }}>Title</label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                  className="admin-table-search"
+                  style={{ width: '100%', padding: '10px 12px' }}
+                  placeholder="Design title"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 4, color: '#374151' }}>Category</label>
+                <input
+                  type="text"
+                  value={editForm.tag}
+                  onChange={e => setEditForm(f => ({ ...f, tag: e.target.value }))}
+                  className="admin-table-search"
+                  style={{ width: '100%', padding: '10px 12px' }}
+                  placeholder="e.g. Living Room, Bedroom"
+                  list="design-categories"
+                />
+                <datalist id="design-categories">
+                  {CATEGORIES.map(cat => <option key={cat} value={cat} />)}
+                </datalist>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'flex-end' }}>
+              <button className="admin-action-btn" onClick={() => setEditingDesign(null)}>Cancel</button>
+              <button className="admin-add-btn" onClick={handleSaveUpdate} style={{ padding: '8px 16px' }}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   )
 }
