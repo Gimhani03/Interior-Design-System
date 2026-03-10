@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Navbar from '../components/Navbar'
+import DesignThumbnail from '../components/DesignThumbnail'
 import './Dashboard.css'
 
 const LayoutIcon = () => (
@@ -91,7 +92,7 @@ const quickActions = [
     desc: 'Explore your project in 3D space',
     btn: 'Launch Viewer',
     primary: false,
-    path: '/viewer', // Pointing to the new viewer placeholder
+    path: '/designs',
   },
 ]
 
@@ -152,14 +153,24 @@ const Dashboard = () => {
     ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : 'U'
 
+  // Deduplicate designs by name to keep "Recent Designs" section diverse
+  // Since designs are already sorted by lastEdited (from API), the first one we see is the newest
+  const getUniqueDesigns = (list) => {
+    const seen = new Set();
+    return list.filter(d => {
+      const name = d.name || d.title;
+      if (seen.has(name)) return false;
+      seen.add(name);
+      return true;
+    });
+  };
+
   // Use real designs if available, otherwise fallback to placeholders
-  const displayDesigns = designs.length > 0 ? designs : recentDesigns
+  const displayDesigns = designs.length > 0 ? getUniqueDesigns(designs) : recentDesigns
   const visibleDesigns = displayDesigns.slice(designIdx, designIdx + 2)
 
   // Real Stats
   const totalDesignsCount = designs.length
-  // For "Saved Items" vs "In Progress", we can use thumbnail presence as a proxy 
-  // or just show total if no other logic exists.
   const savedItemsCount = designs.filter(d => d.thumbnail).length
   const inProgressCount = designs.length - savedItemsCount
   const lastEditedName = designs.length > 0 ? (designs[0].name || 'Untitled') : 'None'
@@ -252,8 +263,12 @@ const Dashboard = () => {
                   onClick={openInDesigner}
                   style={{ cursor: 'pointer' }}
                 >
-                  <div className="db-design-img-wrap">
-                    <img src={design.thumbnail || design.image} alt={design.name || design.title} className="db-design-img" style={{ objectFit: design.thumbnail ? 'contain' : 'cover' }} />
+                  <div className="db-design-img-wrap" style={{ overflow: 'hidden' }}>
+                    <DesignThumbnail
+                      designId={design._id || design.id}
+                      designData={isApiDesign ? design : null}
+                      className="db-design-img"
+                    />
                     <span className="db-design-tag">{design.tag || '2D Layout'}</span>
                   </div>
                   <div className="db-design-body">
@@ -263,7 +278,25 @@ const Dashboard = () => {
                         ? `Last edited: ${typeof design.lastEdited === 'number' || design.lastEdited instanceof Date ? new Date(design.lastEdited).toLocaleDateString() : design.lastEdited}`
                         : 'Last edited: —'}
                     </p>
-                    <button className="db-btn-outline db-design-btn" onClick={e => { e.stopPropagation(); openInDesigner() }}>Continue Editing</button>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button className="db-btn-outline db-design-btn" style={{ flex: 1, padding: '8px 0' }} onClick={e => { e.stopPropagation(); openInDesigner() }}>Edit Plan</button>
+                      <button
+                        className="db-btn-primary db-design-btn"
+                        style={{ flex: 1, padding: '8px 0', fontSize: '12px' }}
+                        onClick={e => {
+                          e.stopPropagation();
+                          navigate('/viewer', {
+                            state: {
+                              roomSize: design.roomSize,
+                              furniture: design.furniture || [],
+                              designId: design._id || null
+                            }
+                          })
+                        }}
+                      >
+                        View in 3D
+                      </button>
+                    </div>
                   </div>
                 </div>
               )
