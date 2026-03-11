@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Stage, Layer, Rect, Text, Line, Group, Circle } from 'react-konva';
 import { getDesignLayout, saveDesignLayout } from '../data/designSamples';
 import {
   Search, ChevronDown, Trash2, Box, Undo2, Redo2,
   ZoomIn, ZoomOut, Hand, MousePointer2, Save, Download, Copy,
   Magnet, Maximize, Hammer, Sofa, Settings2, Palette,
-  Scissors, Link2, AlignJustify, EyeOff, CheckCircle, AlertCircle
+  Scissors, Link2, AlignJustify, Eye, EyeOff, CheckCircle, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -256,6 +256,7 @@ const RoomPreviewIcon = ({ template }) => {
 
 const Designer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [roomSize, setRoomSize] = useState({
     x: 100, y: 50,
     width: 600, height: 500,
@@ -304,9 +305,20 @@ const Designer = () => {
       } catch (err) { }
     };
 
-    // Check for sample design from Designs page (2D format)
+    // Check for incoming design state (from Designs page or 3D Viewer)
     const loadDesignIfAny = async () => {
       const state = location.state || {};
+
+      // CHECK 1: Return from 3D View (Direct State)
+      if (state.directRoomSize && state.directFurniture) {
+        setRoomSize(state.directRoomSize);
+        setHistory([state.directFurniture]);
+        setHistoryStep(0);
+        if (state.designName) setDesignName(state.designName);
+        return;
+      }
+
+      // CHECK 2: Sample design from Designs page (2D format)
       const sid = state.designId;
       const sampleLayout = sid && getDesignLayout(sid);
 
@@ -456,6 +468,7 @@ const Designer = () => {
       height: Math.round(f.height),
       rotation: Math.round(f.rotation || 0),
       modelHeight: Math.round(f.modelHeight || 75),
+      modelPath: f.modelPath,
       isStructural: !!f.isStructural,
       swingLeft: !!f.swingLeft,
       swingOut: !!f.swingOut
@@ -498,6 +511,7 @@ const Designer = () => {
         height: f.height,
         rotation: f.rotation,
         modelHeight: f.modelHeight,
+        modelPath: f.modelPath,
         isStructural: f.isStructural,
         swingLeft: f.swingLeft,
         swingOut: f.swingOut
@@ -570,7 +584,8 @@ const Designer = () => {
       img: item.imagePath || item.image || 'https://placehold.co/100x100?text=Furniture',
       w: Math.round(item.dimensions?.width || 100),
       d: Math.round(item.dimensions?.depth || 100),
-      h: Math.round(item.dimensions?.height || 75) // Storage for 3D Tallness
+      h: Math.round(item.dimensions?.height || 75), // Storage for 3D Tallness
+      modelPath: item.modelPath
     });
     return acc;
   }, {});
@@ -606,6 +621,7 @@ const Designer = () => {
       y: snapToGrid ? Math.round(dropY / 20) * 20 : Math.round(dropY),
       width: itemData.w, height: itemData.d, rotation: 0,
       modelHeight: itemData.h, // Store the 3D Tallness independently
+      modelPath: itemData.modelPath,
       isStructural: itemData.isStructural || false,
       swingLeft: itemData.swingLeft || false, swingOut: itemData.swingOut || false
     };
@@ -765,6 +781,19 @@ const Designer = () => {
               document.body.appendChild(link); link.click(); document.body.removeChild(link);
             }, 100);
           }}><Download size={18} style={{ marginRight: '5px' }} /> Export Plan</button>
+
+          <button className="icon-btn" onClick={() => {
+            navigate('/viewer', {
+              state: {
+                roomSize,
+                furniture: furnitureOnFloor,
+                designId: currentDesignId || sampleDesignId
+              }
+            });
+          }} style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <Eye size={18} style={{ marginRight: '5px' }} /> 3D Render
+          </button>
+
           <button className="btn-save-primary" onClick={handleSaveDesign} disabled={!hasChanges}><Save size={18} /> Save Design</button>
         </div>
       </div>

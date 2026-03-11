@@ -14,7 +14,8 @@ const FurnitureSchema = new mongoose.Schema({
   modelHeight: Number,
   isStructural: { type: Boolean, default: false },
   swingLeft: { type: Boolean, default: false },
-  swingOut: { type: Boolean, default: false }
+  swingOut: { type: Boolean, default: false },
+  modelPath: String
 }, { _id: false });
 
 const DesignSchema = new mongoose.Schema({

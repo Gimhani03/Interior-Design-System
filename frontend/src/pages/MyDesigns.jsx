@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import DesignThumbnail from '../components/DesignThumbnail';
 import { Trash2, Edit3, Calendar, Maximize2, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 import './Dashboard.css'; // Reusing some base styles
 
@@ -120,14 +121,12 @@ const MyDesigns = () => {
                 onClick={() => navigate(`/designer?id=${design._id}`)}
                 style={{ cursor: 'pointer' }}
               >
-                <div className="db-design-img-wrap" style={{ height: '220px', background: '#fff', borderBottom: '1px solid #F3EDE6' }}>
-                  {design.thumbnail ? (
-                    <img src={design.thumbnail} alt={design.name} className="db-design-img" style={{ objectFit: 'contain', padding: '10px' }} />
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8' }}>
-                      <Maximize2 size={32} opacity={0.3} />
-                    </div>
-                  )}
+                <div className="db-design-img-wrap" style={{ height: '220px', background: '#fff', borderBottom: '1px solid #F3EDE6', overflow: 'hidden' }}>
+                  <DesignThumbnail
+                    designId={design._id}
+                    designData={design} // Pass full data to avoid extra fetches
+                    className="db-design-img"
+                  />
                   <div className="db-design-tag">2D Layout</div>
                 </div>
                 <div className="db-design-body">

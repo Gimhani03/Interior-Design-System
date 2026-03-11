@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import DesignThumbnail from '../components/DesignThumbnail'
-import { getDesignsList } from '../data/designSamples'
+import { getDesignsList, getDesignLayout } from '../data/designSamples'
 import './FurnitureCatalog.css'
 import './Designs.css'
 
@@ -63,7 +63,7 @@ const Designs = () => {
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
-            
+
           </div>
 
           <div className="catalog-pills">
@@ -89,36 +89,50 @@ const Designs = () => {
         <div className="catalog-grid">
           {filteredDesigns.length > 0
             ? filteredDesigns.map(design => (
-                <div key={design.id} className="dcard" onClick={() => navigate('/designer', { state: { designId: design.id } })}>
-                  <div className="dcard-img-wrap">
-                    <DesignThumbnail designId={design.id} className="dcard-img" />
-                    <span className="dcard-badge dcard-badge-2d">2D Layout</span>
-                  </div>
-                  <div className="dcard-body">
-                    <h3 className="dcard-title">{design.title}</h3>
-                    <p className="dcard-meta">Last edited: {design.lastEdited}</p>
+              <div key={design.id} className="dcard" onClick={() => navigate('/designer', { state: { designId: design.id } })}>
+                <div className="dcard-img-wrap">
+                  <DesignThumbnail designId={design.id} className="dcard-img" />
+                  <span className="dcard-badge dcard-badge-2d">2D Layout</span>
+                </div>
+                <div className="dcard-body">
+                  <h3 className="dcard-title">{design.title}</h3>
+                  <p className="dcard-meta">Last edited: {design.lastEdited}</p>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                     <button
                       className="dcard-btn dcard-btn-continue"
+                      style={{ flex: 1, padding: '10px 0', fontSize: '13px' }}
                       onClick={e => { e.stopPropagation(); navigate('/designer', { state: { designId: design.id } }) }}
                     >
-                      Continue Editing
+                      Edit Plan
+                    </button>
+                    <button
+                      className="dcard-btn"
+                      style={{ flex: 1, padding: '10px 0', fontSize: '13px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold' }}
+                      onClick={e => {
+                        e.stopPropagation();
+                        const layout = getDesignLayout(design.id);
+                        navigate('/viewer', { state: { roomSize: layout.roomSize, furniture: layout.furniture, designId: design.id } });
+                      }}
+                    >
+                      View in 3D
                     </button>
                   </div>
                 </div>
-              ))
+              </div>
+            ))
             : (
-                <div className="catalog-empty">
-                  <div className="catalog-empty-icon">🎨</div>
-                  <h3>No designs found</h3>
-                  <p>Try adjusting your search or filter.</p>
-                  <button
-                    className="catalog-empty-btn"
-                    onClick={() => { setSearchTerm(''); setSelectedCategory('All') }}
-                  >
-                    Clear filters
-                  </button>
-                </div>
-              )
+              <div className="catalog-empty">
+                <div className="catalog-empty-icon">🎨</div>
+                <h3>No designs found</h3>
+                <p>Try adjusting your search or filter.</p>
+                <button
+                  className="catalog-empty-btn"
+                  onClick={() => { setSearchTerm(''); setSelectedCategory('All') }}
+                >
+                  Clear filters
+                </button>
+              </div>
+            )
           }
         </div>
       </div>

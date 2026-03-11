@@ -5,8 +5,9 @@ import { getDesignLayout } from '../data/designSamples'
  * Renders the actual 2D layout as a thumbnail for design cards.
  * Uses getDesignLayout to show updated layouts when user has edited and saved.
  */
-const DesignThumbnail = ({ designId, className = '' }) => {
-  const layout = getDesignLayout(designId)
+const DesignThumbnail = ({ designId, designData = null, className = '' }) => {
+  // Use passed data or look up in sample catalog
+  const layout = designData || getDesignLayout(designId)
   if (!layout) return null
 
   // Use saved thumbnail if available (shows exact edited design)
@@ -54,12 +55,17 @@ const DesignThumbnail = ({ designId, className = '' }) => {
   })
 
   // Room floor (inner)
-  const floorPoints = [
-    toSvg(innerX, innerY),
-    toSvg(innerX + rw, innerY),
-    toSvg(innerX + rw, innerY + rh),
-    toSvg(innerX, innerY + rh)
-  ]
+  let floorPoints = []
+  if (roomSize.isPoly && roomSize.points && roomSize.points.length > 0) {
+    floorPoints = roomSize.points.map(p => toSvg(p.x + wt, p.y + wt));
+  } else {
+    floorPoints = [
+      toSvg(innerX, innerY),
+      toSvg(innerX + rw, innerY),
+      toSvg(innerX + rw, innerY + rh),
+      toSvg(innerX, innerY + rh)
+    ]
+  }
   const floorPath = floorPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
 
   // Grid lines (faint, 40cm spacing)

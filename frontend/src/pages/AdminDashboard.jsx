@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import API from '../services/api'
+import DesignThumbnail from '../components/DesignThumbnail'
 import { SectionCards } from '@/components/section-cards'
 import { ChartAreaInteractive } from '@/components/chart-area-interactive'
 import { DataTable } from '@/components/data-table'
@@ -54,7 +55,7 @@ const recentDesigns = [
 const quickActionsNoPurchaseHistory = [
   { icon: <PlusIcon />, title: 'New Layout', desc: 'Start designing a room from scratch', btn: 'Create Layout', primary: true, path: '/designer' },
   { icon: <FolderIcon />, title: 'My Designs', desc: 'Browse and manage saved layouts', btn: 'Open Designs', primary: false, path: '/my-designs' },
-  { icon: <BoxIcon />, title: '3D Viewer', desc: 'Explore your project in 3D space', btn: 'Launch Viewer', primary: false, path: '/viewer' },
+  { icon: <BoxIcon />, title: '3D Viewer', desc: 'Explore your project in 3D space', btn: 'Launch Viewer', primary: false, path: '/designs' },
 ]
 
 const NAV_ITEMS = [
@@ -76,7 +77,7 @@ const NAV_ITEMS = [
   },
   {
     url: '/admin/manage-designs', label: 'Manage Designs',
-    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
   },
   {
     url: '/admin/catalog', label: 'Catalog',
@@ -244,10 +245,24 @@ export default function AdminDashboard() {
             </div>
 
             <div className="db-designs-grid">
-              {(designs.length > 0 ? designs : recentDesigns).slice(designIdx, designIdx + 2).map(design => (
+              {(() => {
+                const rawList = designs.length > 0 ? designs : recentDesigns;
+                const seen = new Set();
+                const uniqueList = rawList.filter(d => {
+                  const name = d.name || d.title;
+                  if (seen.has(name)) return false;
+                  seen.add(name);
+                  return true;
+                });
+                return uniqueList.slice(designIdx, designIdx + 2);
+              })().map(design => (
                 <div key={design._id || design.id} className="db-design-card">
-                  <div className="db-design-img-wrap">
-                    <img src={design.thumbnail || design.image} alt={design.name || design.title} className="db-design-img" style={{ objectFit: design.thumbnail ? 'contain' : 'cover' }} />
+                  <div className="db-design-img-wrap" style={{ overflow: 'hidden' }}>
+                    <DesignThumbnail
+                      designId={design._id || design.id}
+                      designData={design._id ? design : null}
+                      className="db-design-img"
+                    />
                     <span className="db-design-tag">{design.tag || '2D Layout'}</span>
                   </div>
                   <div className="db-design-body">
@@ -255,7 +270,22 @@ export default function AdminDashboard() {
                     <p className="db-design-meta">
                       {design.lastEdited ? `Last edited: ${new Date(design.lastEdited).toLocaleDateString()}` : `Last edited: ${design.lastEdited}`}
                     </p>
-                    <button className="db-btn-outline db-design-btn" onClick={() => navigate('/viewer')}>Continue Editing</button>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button className="db-btn-outline db-design-btn" style={{ flex: 1, padding: '8px 0' }} onClick={() => navigate(`/designer?id=${design._id || design.id}`)}>Edit Plan</button>
+                      <button
+                        className="db-btn-primary db-design-btn"
+                        style={{ flex: 1, padding: '8px 0', fontSize: '12px' }}
+                        onClick={() => navigate('/viewer', {
+                          state: {
+                            roomSize: design.roomSize,
+                            furniture: design.furniture || [],
+                            designId: design._id || null
+                          }
+                        })}
+                      >
+                        View in 3D
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
