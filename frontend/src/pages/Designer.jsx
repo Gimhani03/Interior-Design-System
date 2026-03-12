@@ -287,6 +287,7 @@ const Designer = () => {
   const [sampleDesignId, setSampleDesignId] = useState(null);
   const [designName, setDesignName] = useState('My Interior Design');
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [bulkFurnitureColor, setBulkFurnitureColor] = useState('#795548');
   const stageRef = useRef(null);
   const polyDragRef = useRef(null); // High-Precision Drag Anchor
 
@@ -471,7 +472,9 @@ const Designer = () => {
       modelPath: f.modelPath,
       isStructural: !!f.isStructural,
       swingLeft: !!f.swingLeft,
-      swingOut: !!f.swingOut
+      swingOut: !!f.swingOut,
+      color: f.color,
+      shading: f.shading
     }));
 
     // If editing a catalog design, always update the Designs section (works without login)
@@ -514,7 +517,9 @@ const Designer = () => {
         modelPath: f.modelPath,
         isStructural: f.isStructural,
         swingLeft: f.swingLeft,
-        swingOut: f.swingOut
+        swingOut: f.swingOut,
+        color: f.color,
+        shading: f.shading
       })),
       thumbnail: uiThumbnail
     };
@@ -631,8 +636,11 @@ const Designer = () => {
   };
 
   const handlePropertyChange = (property, value) => {
+    const finalValue = typeof value === 'boolean' ? value
+      : typeof value === 'string' ? value
+      : Math.round(value);
     const updated = furnitureOnFloor.map(item =>
-      item.id === selectedId ? { ...item, [property]: (typeof value === 'boolean' ? value : Math.round(value)) } : item
+      item.id === selectedId ? { ...item, [property]: finalValue } : item
     );
     commitAction(updated);
   };
@@ -1414,6 +1422,34 @@ const Designer = () => {
                     <span style={{ fontSize: '13px', fontWeight: 'bold', fontFamily: 'monospace' }}>{roomSize.wallColor.toUpperCase()}</span>
                   </div>
                 </div>
+
+                {furnitureOnFloor.length > 0 && (
+                  <div className="property-group">
+                    <label>Apply Colour to All Furniture</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input
+                        type="color"
+                        value={bulkFurnitureColor}
+                        onChange={e => setBulkFurnitureColor(e.target.value)}
+                        style={{ width: '35px', height: '35px', border: 'none', padding: 0, cursor: 'pointer', background: 'transparent' }}
+                      />
+                      <button
+                        type="button"
+                        className="admin-action-btn edit"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                        onClick={() => {
+                          const count = furnitureOnFloor.filter(f => !f.isStructural).length;
+                          const updated = furnitureOnFloor.map(f => f.isStructural ? f : { ...f, color: bulkFurnitureColor });
+                          commitAction(updated);
+                          showToast(`Applied colour to ${count} furniture item(s).`, 'success');
+                        }}
+                      >
+                        Apply to All
+                      </button>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: 4 }}>Sets finish colour for all furniture (visible in 3D).</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1467,6 +1503,20 @@ const Designer = () => {
                     <div className="property-group">
                       <label>Rotation (°)</label>
                       <input type="number" min="0" max="360" value={Math.round(getSelectedItem().rotation)} onChange={e => handlePropertyChange('rotation', Number(e.target.value))} />
+                    </div>
+
+                    <div className="property-group">
+                      <label>Finish Colour (3D)</label>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#f8fafc', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <input
+                          type="color"
+                          value={getSelectedItem().color || '#795548'}
+                          onChange={e => handlePropertyChange('color', e.target.value)}
+                          style={{ width: '35px', height: '35px', border: 'none', padding: 0, cursor: 'pointer', background: 'transparent' }}
+                        />
+                        <span style={{ fontSize: '13px', fontWeight: 'bold', fontFamily: 'monospace' }}>{(getSelectedItem().color || '#795548').toUpperCase()}</span>
+                      </div>
+                      <p style={{ fontSize: '11px', color: '#64748b', marginTop: 4 }}>Material colour in 3D view.</p>
                     </div>
                   </>
                 )}
