@@ -3,9 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, ContactShadows, PivotControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { ArrowLeft, Sofa, Maximize, Save, Palette, Trash2 } from 'lucide-react';
+import { ArrowLeft, Sofa, Maximize, Palette, Trash2, Sun, Download } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import axios from 'axios';
 import { toast } from 'sonner';
 
 /**
@@ -48,7 +47,7 @@ function isPointInPoly(p, poly) {
 // ====================================================
 // COMPONENT 1: FURNITURE (Interactive & Boundary-Aware)
 // ====================================================
-function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, onUpdate, onSelect, onDragToggle }) {
+function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, shadowIntensity = 0.6, onUpdate, onSelect, onDragToggle }) {
   const [isValid, setIsValid] = useState(true);
 
   const getModelPath = () => {
@@ -122,7 +121,7 @@ function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, onU
       <PivotControls
         visible={isSelected}
         activeAxes={[true, false, true]}
-        disableRotations
+        disableRotations={false}
         depthTest={false}
         fixed={false}
         scale={2.2} // Larger for easier free-drag
@@ -146,17 +145,24 @@ function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, onU
           const dx = pos.x / scale;
           const dz = pos.z / scale;
 
+          const euler = new THREE.Euler().setFromQuaternion(rot);
+          const rotationDeg = Math.round(((euler.y * (180 / Math.PI)) % 360 + 360) % 360);
+
+          const updates = {};
           if (checkValidation(dx, dz)) {
-            onUpdate(f.id, { x: f.x + dx, y: f.y + dz });
+            updates.x = f.x + dx;
+            updates.y = f.y + dz;
           } else {
             toast.error("Invalid move: Furniture must stay inside the room.");
-            setIsValid(true); // Reset visual ghost
+            setIsValid(true);
           }
+          updates.rotation = rotationDeg;
+          onUpdate(f.id, updates);
         }}
       >
         <primitive object={mesh} onClick={(e) => { e.stopPropagation(); onSelect(f.id); }} />
       </PivotControls>
-      <ContactShadows opacity={0.6} scale={Math.max(f.width, f.height) * scale * 2.5} blur={3} far={1} />
+      <ContactShadows opacity={f.shading ?? shadowIntensity} scale={Math.max(f.width, f.height) * scale * 2.5} blur={3} far={1} />
     </group>
   );
 }
@@ -194,7 +200,7 @@ function AdaptiveWall({ p1, p2, offset, h, wt, color }) {
 // ====================================================
 // COMPONENT 3: ARCHITECTURE (Floor & Walls)
 // ====================================================
-const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, onUpdate, onSelect, onDragToggle }) => {
+const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, shadowIntensity = 0.6, onUpdate, onSelect, onDragToggle }) => {
   const scale = 0.01;
   const pts = useMemo(() => getCleanPoints(roomSize, roomSize.wallThickness || 20), [roomSize]);
 
@@ -225,6 +231,7 @@ const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, onUpdat
         <FurnitureModel
           key={f.id} f={f} isSelected={selectedId === f.id}
           roomSize={roomSize} roomOffset={roomOffset}
+          shadowIntensity={shadowIntensity}
           onUpdate={onUpdate} onSelect={onSelect} onDragToggle={onDragToggle}
         />
       ))}
@@ -241,8 +248,9 @@ const Viewer3D = () => {
   const { roomSize, furniture: initialFurniture, designId } = location.state || { roomSize: { width: 600, height: 400 }, furniture: [], designId: null };
   const [furniture, setFurniture] = useState(initialFurniture);
   const [selectedId, setSelectedId] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [controlsEnabled, setControlsEnabled] = useState(true);
+  const [shadowIntensity, setShadowIntensity] = useState(0.6);
+  const glRef = useRef(null);
 
   const roomOffset = useMemo(() => {
     const p = getCleanPoints(roomSize, roomSize.wallThickness || 20);
@@ -255,20 +263,27 @@ const Viewer3D = () => {
     setFurniture(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const userId = storedUser.id || storedUser._id;
-    if (!userId) { toast.error("Please login to save"); return; }
-    try {
-      const payload = { name: roomSize.roomName || 'Professional Design', userId, roomSize, furniture, lastEdited: new Date() };
-      if (designId) await axios.put(`http://localhost:5001/api/designs/${designId}`, payload);
-      else await axios.post('http://localhost:5001/api/designs', payload);
-      toast.success("Design saved successfully!");
-    } catch (err) { toast.error("Save failed"); } finally { setIsSaving(false); }
-  };
-
   const selectedItem = furniture.find(f => f.id === selectedId);
+
+  const handleExportPlan = () => {
+    const canvas = glRef.current?.domElement;
+    if (!canvas) {
+      toast.error('Canvas not ready. Please try again.');
+      return;
+    }
+    try {
+      const uri = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${roomSize.roomName || '3D_Design'}_Export.png`;
+      link.href = uri;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('3D view exported successfully!');
+    } catch (err) {
+      toast.error('Export failed. Please try again.');
+    }
+  };
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#eef2f6', position: 'relative', overflow: 'hidden' }}>
@@ -285,8 +300,11 @@ const Viewer3D = () => {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={handleSave} disabled={isSaving} style={{ background: '#8B7355', color: 'white', border: 'none', padding: '16px 30px', borderRadius: '20px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 25px rgba(139, 115, 85, 0.3)' }}>
-              <Save size={18} /> {isSaving ? 'Saving...' : 'Save Design'}
+            <button
+              onClick={handleExportPlan}
+              style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '16px 24px', borderRadius: '20px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <Download size={18} /> Export Plan
             </button>
             <button
               onClick={() => {
@@ -308,9 +326,9 @@ const Viewer3D = () => {
       </div>
 
       {/* 3D CORE */}
-      <Canvas shadows dpr={[1, 2]} camera={{ position: [15, 15, 15], fov: 32 }}>
+      <Canvas shadows dpr={[1, 2]} camera={{ position: [15, 15, 15], fov: 32 }} gl={{ preserveDrawingBuffer: true }} onCreated={({ gl }) => { glRef.current = gl; }}>
         <Suspense fallback={null}>
-          <RoomArchitecture roomSize={roomSize} roomOffset={roomOffset} furniture={furniture} selectedId={selectedId} onUpdate={updateFurniture} onSelect={setSelectedId} onDragToggle={setControlsEnabled} />
+          <RoomArchitecture roomSize={roomSize} roomOffset={roomOffset} furniture={furniture} selectedId={selectedId} shadowIntensity={shadowIntensity} onUpdate={updateFurniture} onSelect={setSelectedId} onDragToggle={setControlsEnabled} />
           <Environment preset="city" />
           <ambientLight intensity={0.6} />
           <directionalLight position={[15, 30, 15]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]} />
@@ -326,7 +344,8 @@ const Viewer3D = () => {
               <span style={{ fontWeight: '900', color: '#1a202c', fontSize: '14px' }}>{selectedItem.name}</span>
               <button onClick={() => { setFurniture(f => f.filter(i => i.id !== selectedId)); setSelectedId(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e53e3e' }}><Trash2 size={18} /></button>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
               {FINISH_COLORS.map(({ hex, label }) => (
                 <button
                   key={hex} title={label}
@@ -334,17 +353,59 @@ const Viewer3D = () => {
                   style={{ width: '28px', height: '28px', background: hex, borderRadius: '50%', border: selectedItem.color === hex ? '3px solid #3b82f6' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s' }}
                 />
               ))}
+              {furniture.filter(f => !f.isStructural).length > 1 && (
+                <button
+                  onClick={() => {
+                    const color = selectedItem.color || FINISH_COLORS[0].hex;
+                    setFurniture(prev => prev.map(f => f.isStructural ? f : { ...f, color }));
+                    toast.success(`Applied colour to all ${furniture.filter(f => !f.isStructural).length} furniture items.`);
+                  }}
+                  style={{ marginLeft: 8, padding: '6px 12px', fontSize: '11px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}
+                >
+                  Apply to All
+                </button>
+              )}
             </div>
-            <div style={{ fontSize: '11px', color: '#a0aec0', textAlign: 'center', fontWeight: 'bold' }}>DRAG PLANE CENTER HANDLE TO MOVE FREELY</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <label style={{ fontSize: '11px', fontWeight: '600', color: '#64748b' }}>Shading (this item)</label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={selectedItem.shading ?? shadowIntensity}
+                onChange={e => updateFurniture(selectedId, { shading: parseFloat(e.target.value) })}
+                style={{ flex: 1, maxWidth: 100, accentColor: '#8B7355' }}
+              />
+              <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#475569', minWidth: 28 }}>{Math.round((selectedItem.shading ?? shadowIntensity) * 100)}%</span>
+            </div>
+            </div>
+            <div style={{ fontSize: '11px', color: '#a0aec0', textAlign: 'center', fontWeight: 'bold' }}>DRAG TO MOVE · USE RINGS TO ROTATE</div>
           </div>
         </div>
       )}
 
-      {/* HUD BOTTOM BAR */}
-      <div style={{ position: 'absolute', bottom: '20px', left: '40px' }}>
+      {/* HUD BOTTOM BAR + SHADING CONTROLS */}
+      <div style={{ position: 'absolute', bottom: '20px', left: '40px', right: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '20px' }}>
         <div style={{ background: 'rgba(255,255,255,0.7)', padding: '12px 25px', borderRadius: '30px', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid rgba(255,255,255,0.3)' }}>
           <div style={{ width: '10px', height: '10px', background: '#3b82f6', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></div>
           <span style={{ color: '#1a202c', fontSize: '10px', fontWeight: '900', letterSpacing: '1px' }}>BIM COLLISION GUARD ACTIVE</span>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.9)', padding: '14px 24px', borderRadius: '20px', backdropFilter: 'blur(15px)', border: '1px solid rgba(255,255,255,0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <Sun size={18} color="#8B7355" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <label style={{ fontSize: '11px', fontWeight: '700', color: '#475569', letterSpacing: '0.5px' }}>SHADING</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={shadowIntensity}
+              onChange={e => setShadowIntensity(parseFloat(e.target.value))}
+              style={{ width: '120px', accentColor: '#8B7355' }}
+            />
+          </div>
+          <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b', minWidth: 36 }}>{Math.round(shadowIntensity * 100)}%</span>
         </div>
       </div>
       <style>{`@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }`}</style>
