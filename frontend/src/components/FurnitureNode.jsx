@@ -542,7 +542,7 @@ const FurnitureNode = ({ shapeProps, isSelected, onSelect, onChange, snapToGrid,
         <Transformer
           ref={trRef} 
           rotateEnabled={!isStructural}
-          enabledAnchors={isStructural ? ['middle-left', 'middle-right'] : []} // No resize for furniture!
+          enabledAnchors={isStructural ? ['middle-left', 'middle-right'] : ['top-left', 'top-right', 'bottom-left', 'bottom-right']}
           anchorFill="#ffffff" anchorStroke={THEME_BROWN} anchorSize={10} borderStroke={THEME_BROWN}
         />
       )}
