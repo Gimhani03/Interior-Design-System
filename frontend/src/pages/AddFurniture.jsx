@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { AdminLayout } from '../components/AdminLayout'
 import './AdminDashboard.css'
 
@@ -43,10 +44,10 @@ const AddFurniture = () => {
         },
       }
       await axios.post('http://localhost:5001/api/furniture', finalData)
-      alert('Furniture added successfully!')
+      toast.success('Furniture added successfully!')
       navigate('/admin/furniture-management')
     } catch (_) {
-      alert('Error: Check if all fields are filled correctly.')
+      toast.error('Error: Check if all fields are filled correctly.')
     }
   }
 

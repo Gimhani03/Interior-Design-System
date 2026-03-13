@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useBlocker, useBeforeUnload } from 'react-router-dom';
 import { Stage, Layer, Rect, Text, Line, Group, Circle } from 'react-konva';
 import { getDesignLayout, saveDesignLayout } from '../data/designSamples';
 import {
   Search, ChevronDown, Trash2, Box, Undo2, Redo2,
   ZoomIn, ZoomOut, Hand, MousePointer2, Save, Download, Copy,
   Magnet, Maximize, Hammer, Sofa, Settings2, Palette,
-  Scissors, Link2, AlignJustify, Eye, EyeOff, CheckCircle, AlertCircle
+  Scissors, Link2, AlignJustify, Eye, EyeOff, Loader2
 } from 'lucide-react';
 import axios from 'axios';
+import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import FurnitureNode from '../components/FurnitureNode';
-import { ImageWithFallback } from '../components/ImageWithFallback'; // Added this
+import { ImageWithFallback } from '../components/ImageWithFallback';
 import './Designer.css';
 
 const THEME_BROWN = "#8d6e63";
@@ -286,15 +287,17 @@ const Designer = () => {
   const [currentDesignId, setCurrentDesignId] = useState(null);
   const [sampleDesignId, setSampleDesignId] = useState(null);
   const [designName, setDesignName] = useState('My Interior Design');
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [isSaving, setIsSaving] = useState(false);
+  const [isTransitioningTo3D, setIsTransitioningTo3D] = useState(false);
   const [bulkFurnitureColor, setBulkFurnitureColor] = useState('#795548');
   const stageRef = useRef(null);
-  const polyDragRef = useRef(null); // High-Precision Drag Anchor
+  const polyDragRef = useRef(null);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
-  };
+  // Unsaved changes: block in-app navigation and warn on browser close/refresh
+  const blocker = useBlocker(hasChanges);
+  useBeforeUnload((e) => {
+    if (hasChanges) e.preventDefault();
+  }, { capture: true });
 
   const furnitureOnFloor = history[historyStep] || [];
 
@@ -486,13 +489,14 @@ const Designer = () => {
         name: designName
       });
       setHasChanges(false);
-      showToast("Design updated! Changes will appear in the Designs section.", "success");
+      toast.success("Design updated! Changes will appear in the Designs section.");
       window.dispatchEvent(new CustomEvent('designs-updated'));
+      return;
     }
 
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
-      if (!sampleDesignId) alert("Please log in to save your designs.");
+      toast.error("Please log in to save your designs.");
       return;
     }
 
@@ -525,17 +529,20 @@ const Designer = () => {
     };
 
     try {
+      setIsSaving(true);
       const res = await axios.post('http://localhost:5001/api/designs', payload);
       setCurrentDesignId(res.data._id);
       setHasChanges(false);
-      showToast("Design saved successfully! You can find it in 'My Designs'.", "success");
+      toast.success("Design saved successfully! You can find it in 'My Designs'.");
       window.dispatchEvent(new CustomEvent('designs-updated'));
     } catch (err) {
       console.error("Save Error:", err);
       const serverData = err.response?.data;
       const msg = serverData?.message || err.message;
       const detail = serverData?.error ? ` (${serverData.error})` : "";
-      showToast(`Save failed: ${msg}${detail}`, "error");
+      toast.error(`Save failed: ${msg}${detail}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -790,19 +797,30 @@ const Designer = () => {
             }, 100);
           }}><Download size={18} style={{ marginRight: '5px' }} /> Export Plan</button>
 
-          <button className="icon-btn" onClick={() => {
-            navigate('/viewer', {
-              state: {
-                roomSize,
-                furniture: furnitureOnFloor,
-                designId: currentDesignId || sampleDesignId
-              }
-            });
-          }} style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-            <Eye size={18} style={{ marginRight: '5px' }} /> 3D Render
+          <button
+            className="icon-btn"
+            onClick={() => {
+              setIsTransitioningTo3D(true);
+              toast.info('Loading 3D view...');
+              navigate('/viewer', {
+                state: {
+                  roomSize,
+                  furniture: furnitureOnFloor,
+                  designId: currentDesignId || sampleDesignId
+                }
+              });
+            }}
+            disabled={isTransitioningTo3D}
+            style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+          >
+            {isTransitioningTo3D ? <Loader2 size={18} className="designer-spinner" style={{ marginRight: '5px' }} /> : <Eye size={18} style={{ marginRight: '5px' }} />}
+            3D Render
           </button>
 
-          <button className="btn-save-primary" onClick={handleSaveDesign} disabled={!hasChanges}><Save size={18} /> Save Design</button>
+          <button className="btn-save-primary" onClick={handleSaveDesign} disabled={!hasChanges || isSaving}>
+            {isSaving ? <Loader2 size={18} className="designer-spinner" /> : <Save size={18} />}
+            {isSaving ? ' Saving...' : ' Save Design'}
+          </button>
         </div>
       </div>
 
@@ -1441,7 +1459,7 @@ const Designer = () => {
                           const count = furnitureOnFloor.filter(f => !f.isStructural).length;
                           const updated = furnitureOnFloor.map(f => f.isStructural ? f : { ...f, color: bulkFurnitureColor });
                           commitAction(updated);
-                          showToast(`Applied colour to ${count} furniture item(s).`, 'success');
+                          toast.success(`Applied colour to ${count} furniture item(s).`);
                         }}
                       >
                         Apply to All
@@ -1579,18 +1597,36 @@ const Designer = () => {
           </div>
         )}
 
-        {/* CUSTOM TOAST NOTIFICATION */}
-        {toast.show && (
+        {/* UNSAVED CHANGES BLOCKER MODAL */}
+        {blocker.state === 'blocked' && (
           <div style={{
-            position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
-            background: toast.type === 'success' ? '#10B981' : '#EF4444',
-            color: 'white', padding: '12px 24px', borderRadius: '12px',
-            display: 'flex', alignItems: 'center', gap: '10px', zIndex: 10000,
-            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-            animation: 'toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
           }}>
-            {toast.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-            <span style={{ fontWeight: '600', fontSize: '14px' }}>{toast.message}</span>
+            <div style={{
+              background: 'white', padding: '24px', borderRadius: '16px',
+              maxWidth: 400, boxShadow: '0 20px 50px rgba(0,0,0,0.2)'
+            }}>
+              <h3 style={{ margin: '0 0 12px', fontSize: '18px', color: '#111827' }}>Unsaved changes</h3>
+              <p style={{ margin: '0 0 20px', color: '#6b7280', fontSize: '14px' }}>
+                You have unsaved changes. Are you sure you want to leave?
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => blocker.reset()}
+                  style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Stay
+                </button>
+                <button
+                  onClick={() => blocker.proceed()}
+                  style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: THEME_BROWN, color: 'white', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Leave anyway
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

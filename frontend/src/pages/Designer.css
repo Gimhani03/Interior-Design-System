@@ -301,3 +301,13 @@
     opacity: 1;
   }
 }
+
+.designer-spinner {
+  animation: designerSpin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes designerSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

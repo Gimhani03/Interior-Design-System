@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { FaUser } from "react-icons/fa";
 import './ForgotPassword.css'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import API from '../services/api';
 
 const ForgotPassword = () => {
@@ -14,7 +15,7 @@ const ForgotPassword = () => {
     e.preventDefault(); // stop page reload
 
     if (!email) {
-      alert("Email is required");
+      toast.error("Email is required");
       return; // STOP navigation
     }
 
@@ -22,10 +23,10 @@ const ForgotPassword = () => {
     try {
     await API.post('/password/send-otp', { email });
     localStorage.setItem('resetEmail', email);
-    alert('OTP sent to your email!');
+    toast.success('OTP sent to your email!');
     navigate("/reset-password");
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to send OTP');
+    toast.error(error.response?.data?.message || 'Failed to send OTP');
   } finally {
     setIsLoading(false);
   }

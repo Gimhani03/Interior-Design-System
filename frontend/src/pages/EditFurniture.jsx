@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { AdminLayout } from '../components/AdminLayout'
 import './AdminDashboard.css'
 
@@ -55,10 +56,10 @@ const EditFurniture = () => {
         },
       }
       await axios.put(`http://localhost:5001/api/furniture/${id}`, updatedData)
-      alert('Update Successful!')
+      toast.success('Update Successful!')
       navigate('/admin/furniture-management')
     } catch (_) {
-      alert('Update failed. Check server logs.')
+      toast.error('Update failed. Check server logs.')
     }
   }
 

@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import './ConfirmPassword.css'
 import { FaLock } from 'react-icons/fa'
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import API from '../services/api';
 
 const ConfirmPassword = () => {
@@ -19,17 +20,17 @@ const navigate = useNavigate();
     e.preventDefault(); // stop page reload
 
     if (!newPassword || !confirmPassword) {
-      alert("All fields are required");
+      toast.error("All fields are required");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     if (newPassword.length < 8) {
-      alert("Password must be at least 8 characters long");
+      toast.error("Password must be at least 8 characters long");
       return;
     }
     const email = localStorage.getItem('resetEmail');
@@ -39,10 +40,10 @@ const navigate = useNavigate();
     try {
     await API.post('/password/reset-password', { email, newPassword });
     localStorage.removeItem('resetEmail');
-    alert('Password changed successfully!');
+    toast.success('Password changed successfully!');
     navigate("/login");
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to reset password');
+    toast.error(error.response?.data?.message || 'Failed to reset password');
   } finally {
     setIsLoading(false);
   }

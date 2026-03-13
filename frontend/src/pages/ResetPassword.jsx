@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './ResetPassword.css';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import API from '../services/api';
 
 const ResetPassword = () => {
@@ -35,7 +36,7 @@ const ResetPassword = () => {
 
     // Check if any digit is empty
     if (otp.includes("")) {
-      alert("Please enter the complete 6-digit code");
+      toast.error("Please enter the complete 6-digit code");
       return;
     }
 
@@ -47,7 +48,7 @@ const ResetPassword = () => {
     await API.post('/password/verify-otp', { email, otp: otpString });
     navigate("/confirm-password");
   } catch (error) {
-    alert(error.response?.data?.message || 'Invalid OTP');
+    toast.error(error.response?.data?.message || 'Invalid OTP');
   } finally {
     setIsLoading(false);
   }

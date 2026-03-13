@@ -1,5 +1,6 @@
 import './App.css'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'sonner'
 
 import Login from './pages/login.jsx'
 import Register from './pages/register.jsx'
@@ -30,6 +31,7 @@ import Designer from './pages/Designer'
 
 function App() {
   return (
+    <>
     <Routes>
 
       {/* Public Routes */}
@@ -67,6 +69,8 @@ function App() {
       <Route path="/admin/manage-designs" element={<ManageDesigns />} />
 
     </Routes>
+    <Toaster position="top-center" richColors closeButton />
+    </>
   )
 }
 

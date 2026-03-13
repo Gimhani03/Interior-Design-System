@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, ContactShadows, PivotControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { ArrowLeft, Sofa, Maximize, Palette, Trash2, Sun, Download } from 'lucide-react';
+import { ArrowLeft, Sofa, Maximize, Palette, Trash2, Sun, Download, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { toast } from 'sonner';
 
@@ -239,6 +239,14 @@ const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, shadowI
   );
 };
 
+// SceneReady: signals when Suspense has resolved (3D models loaded)
+function SceneReady({ onReady }) {
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+  return null;
+}
+
 // ====================================================
 // MAIN PAGE: VIEWER 3D STUDIO
 // ====================================================
@@ -250,6 +258,7 @@ const Viewer3D = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [controlsEnabled, setControlsEnabled] = useState(true);
   const [shadowIntensity, setShadowIntensity] = useState(0.6);
+  const [is3DLoading, setIs3DLoading] = useState(true);
   const glRef = useRef(null);
 
   const roomOffset = useMemo(() => {
@@ -325,6 +334,19 @@ const Viewer3D = () => {
         </div>
       </div>
 
+      {/* 3D LOADING OVERLAY */}
+      {is3DLoading && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(238, 242, 246, 0.95)', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', zIndex: 50, gap: 16
+        }}>
+          <Loader2 size={48} color="#8B7355" style={{ animation: 'viewer3d-spin 1s linear infinite' }} />
+          <span style={{ fontSize: 16, fontWeight: 600, color: '#1a202c' }}>Loading 3D view...</span>
+          <span style={{ fontSize: 13, color: '#64748b' }}>Preparing models and environment</span>
+        </div>
+      )}
+
       {/* 3D CORE */}
       <Canvas shadows dpr={[1, 2]} camera={{ position: [15, 15, 15], fov: 32 }} gl={{ preserveDrawingBuffer: true }} onCreated={({ gl }) => { glRef.current = gl; }}>
         <Suspense fallback={null}>
@@ -333,6 +355,7 @@ const Viewer3D = () => {
           <ambientLight intensity={0.6} />
           <directionalLight position={[15, 30, 15]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]} />
           <OrbitControls enabled={controlsEnabled} makeDefault enableDamping dampingFactor={0.05} maxPolarAngle={Math.PI / 2.2} minDistance={5} maxDistance={45} />
+          <SceneReady onReady={() => setIs3DLoading(false)} />
         </Suspense>
       </Canvas>
 
@@ -408,7 +431,10 @@ const Viewer3D = () => {
           <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b', minWidth: 36 }}>{Math.round(shadowIntensity * 100)}%</span>
         </div>
       </div>
-      <style>{`@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }`}</style>
+      <style>{`
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes viewer3d-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 };
