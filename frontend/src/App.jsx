@@ -21,6 +21,7 @@ import ManageUsers from './pages/ManageUsers.jsx'
 import ManageDesigns from './pages/ManageDesigns.jsx'
 import AdminDesigns from './pages/AdminDesigns.jsx'
 import AdminCatalog from './pages/AdminCatalog.jsx'
+import AdminOrders from './pages/AdminOrders.jsx'
 import Payment from './pages/Payment.jsx'   // ✅ NEW IMPORT
 import PurchaseHistory from './pages/PurchaseHistory.jsx'; // ✅ NEW
 import MyDesigns from './pages/MyDesigns.jsx'; // ✅ NEW
@@ -67,6 +68,7 @@ function App() {
       <Route path="/admin/catalog" element={<AdminCatalog />} />
       <Route path="/admin/designs" element={<AdminDesigns />} />
       <Route path="/admin/manage-designs" element={<ManageDesigns />} />
+      <Route path="/admin/orders" element={<AdminOrders />} />
 
     </Routes>
     <Toaster position="top-center" richColors closeButton />
