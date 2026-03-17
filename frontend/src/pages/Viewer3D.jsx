@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { ArrowLeft, Sofa, Maximize, Palette, Trash2, Sun, Download, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { toast } from 'sonner';
+import './Viewer3D.css';
 
 /**
  * ARCHITECTURAL GRADE 3D ENGINE (V9 - BIM SUPREME EDITOR)
@@ -308,11 +309,8 @@ const Viewer3D = () => {
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button
-              onClick={handleExportPlan}
-              style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '16px 24px', borderRadius: '20px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-            >
+          <div className="viewer-hud-actions">
+            <button onClick={handleExportPlan} className="viewer-hud-btn viewer-hud-btn-outline">
               <Download size={18} /> Export Plan
             </button>
             <button
@@ -327,7 +325,8 @@ const Viewer3D = () => {
                   }
                 });
               }}
-              style={{ background: '#8B7355', color: 'white', border: 'none', padding: '16px 30px', borderRadius: '20px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 8px 25px rgba(139, 115, 85, 0.2)' }}>
+              className="viewer-hud-btn viewer-hud-btn-primary"
+            >
               <ArrowLeft size={18} /> Return to 2D
             </button>
           </div>
