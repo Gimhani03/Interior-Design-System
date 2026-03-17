@@ -94,7 +94,7 @@ export function ChartAreaInteractive() {
           </div>
         )}
         <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={filteredData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <AreaChart data={filteredData} margin={{ top: 36, right: 4, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#8B7355" stopOpacity={0.3} />
