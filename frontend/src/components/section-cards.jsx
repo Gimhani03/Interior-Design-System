@@ -11,7 +11,6 @@ export function SectionCards({ userCount = 0, furnitureCount = 0, totalRevenue =
     { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, badge: null, footer: 'From all orders', sub: 'Total sales revenue', showFooterIcon: false },
     { label: 'Registered Users', value: userCount.toLocaleString(), badge: '+8%', footer: 'Growing steadily', sub: 'Total active user accounts' },
     { label: 'Furniture Items', value: furnitureCount.toLocaleString(), badge: '+3', footer: 'Catalog expanding', sub: 'Products listed in the system' },
-    { label: 'Growth Rate', value: '4.5%', badge: '+4.5%', footer: 'Steady performance', sub: 'Meets growth projections' },
   ]
 
   return (
