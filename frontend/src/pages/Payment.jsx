@@ -151,7 +151,7 @@ const Payment = () => {
               <button className="pay-btn-primary" onClick={() => navigate('/purchase-history')}>
                 View Purchase History
               </button>
-              <button className="pay-btn-outline" onClick={() => navigate('/furniture-catalog')}>
+              <button className="pay-btn-outline" onClick={() => navigate('/catalog')}>
                 Continue Shopping
               </button>
             </div>
