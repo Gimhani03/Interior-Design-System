@@ -110,7 +110,7 @@ const DesignThumbnail = ({ designId, designData = null, className = '' }) => {
       <text x={centerX} y={centerY + 8} textAnchor="middle" fontSize={9} fill="#6b7280" fontWeight="500">{areaM2} m²</text>
 
       {/* Furniture - dark grey rectangles with labels */}
-      {furniture.map((f) => {
+      {furniture.map((f, idx) => {
         const fx = f.x - rx
         const fy = f.y - ry
         const fw = f.width
@@ -142,7 +142,7 @@ const DesignThumbnail = ({ designId, designData = null, className = '' }) => {
         const fontSize = Math.min(8, Math.max(6, Math.min(fw, fh) / 8))
 
         return (
-          <g key={f.id}>
+          <g key={f.clientId || f.id || `f-${idx}`}>
             <path
               d={path}
               fill={f.isStructural ? '#94a3b8' : '#4b5563'}
