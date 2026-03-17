@@ -99,18 +99,31 @@
   margin: 0;
 }
 
+/* Button group - consistent alignment and spacing */
+.dcard-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 14px;
+  width: 100%;
+}
+
 .dcard-btn {
-  padding: 10px 0;
-  border-radius: 9px;
+  flex: 1;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 10px;
   border: none;
   background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
-  margin-top: auto;
-  width: 100%;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dcard-btn:hover {
@@ -118,15 +131,26 @@
   transform: translateY(-1px);
 }
 
-/* Continue Editing button - light beige, dark border, dark text (reference style) */
+/* Edit Plan - outline style (matches fcard-btn-outline) */
 .dcard-btn-continue {
-  background: #f5f1ed;
-  color: #374151;
-  border: 1.5px solid #DDD6CE;
+  background: transparent;
+  color: #8B7355;
+  border: 1.5px solid #C9A882;
 }
 
 .dcard-btn-continue:hover {
-  background: #ede9e4;
-  border-color: #C9A882;
-  color: #1f2937;
+  border-color: #8B7355;
+  background: #FFF8F0;
+}
+
+/* View in 3D - primary style (matches fcard-btn-primary) */
+.dcard-btn-3d {
+  background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.3);
+}
+
+.dcard-btn-3d:hover {
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.35);
 }

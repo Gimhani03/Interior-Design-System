@@ -97,17 +97,15 @@ const Designs = () => {
                 <div className="dcard-body">
                   <h3 className="dcard-title">{design.title}</h3>
                   <p className="dcard-meta">Last edited: {design.lastEdited}</p>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <div className="dcard-actions">
                     <button
                       className="dcard-btn dcard-btn-continue"
-                      style={{ flex: 1, padding: '10px 0', fontSize: '13px' }}
                       onClick={e => { e.stopPropagation(); navigate('/designer', { state: { designId: design.id } }) }}
                     >
                       Edit Plan
                     </button>
                     <button
-                      className="dcard-btn"
-                      style={{ flex: 1, padding: '10px 0', fontSize: '13px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold' }}
+                      className="dcard-btn dcard-btn-3d"
                       onClick={e => {
                         e.stopPropagation();
                         const layout = getDesignLayout(design.id);
