@@ -19,6 +19,19 @@ router.get('/stats', protect, admin, async (req, res) => {
   }
 });
 
+// GET /api/admin/orders — fetch all orders for admin order tracking (with user info)
+router.get('/orders', protect, admin, async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch orders.', error: error.message });
+  }
+});
+
 // GET /api/admin/activity — aggregated monthly activity (new users & sales by week)
 router.get('/activity', protect, admin, async (req, res) => {
   try {
