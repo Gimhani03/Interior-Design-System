@@ -276,6 +276,38 @@
   text-decoration: underline;
 }
 
+/* ─── OTP Input (Reset Password) ──────────────────────────────────── */
+.auth-otp-box {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 8px 0 4px;
+}
+
+.auth-otp-input {
+  width: 48px;
+  height: 52px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1.5px solid #DDD6CE;
+  background: #FDFAF7;
+  color: #1F2937;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-otp-input:focus {
+  border-color: #8B7355;
+  box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+}
+
+.auth-otp-input::placeholder {
+  color: #C9A882;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .auth-page {
