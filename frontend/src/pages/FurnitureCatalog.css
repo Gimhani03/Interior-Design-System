@@ -343,11 +343,13 @@
 }
 
 .fcard-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  display: block;
   margin-top: auto;
   padding-top: 4px;
+}
+
+.fcard-actions .fcard-btn-primary {
+  width: 100%;
 }
 
 .fcard-btn-outline {
