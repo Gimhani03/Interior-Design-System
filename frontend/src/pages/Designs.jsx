@@ -89,7 +89,7 @@ const Designs = () => {
         <div className="catalog-grid">
           {filteredDesigns.length > 0
             ? filteredDesigns.map(design => (
-              <div key={design.id} className="dcard" onClick={() => navigate('/designer', { state: { designId: design.id } })}>
+              <div key={design.id} className="dcard" onClick={() => navigate('/designer', { state: { designId: design.id, title: design.title, saveToMyDesigns: true } })}>
                 <div className="dcard-img-wrap">
                   <DesignThumbnail designId={design.id} className="dcard-img" />
                   <span className="dcard-badge dcard-badge-2d">2D Layout</span>
@@ -100,7 +100,7 @@ const Designs = () => {
                   <div className="dcard-actions">
                     <button
                       className="dcard-btn dcard-btn-continue"
-                      onClick={e => { e.stopPropagation(); navigate('/designer', { state: { designId: design.id } }) }}
+                      onClick={e => { e.stopPropagation(); navigate('/designer', { state: { designId: design.id, title: design.title, saveToMyDesigns: true } }) }}
                     >
                       Edit Plan
                     </button>

@@ -4,7 +4,15 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import DesignThumbnail from '../components/DesignThumbnail';
 import { Trash2, Edit3, Calendar, Maximize2, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { SAMPLE_DESIGN_LAYOUTS } from '../data/designSamples';
 import './Dashboard.css'; // Reusing some base styles
+
+/** Sample designs for demo/Figma capture when user has no saved designs */
+const SAMPLE_SAVED_DESIGNS = [
+  { _id: 'sample-1', ...SAMPLE_DESIGN_LAYOUTS[2], name: 'ChildBedroom', lastEdited: '2026-03-17T10:30:00Z' },
+  { _id: 'sample-2', ...SAMPLE_DESIGN_LAYOUTS[1], name: 'My Interior Design', lastEdited: '2026-03-17T14:20:00Z' },
+  { _id: 'sample-3', ...SAMPLE_DESIGN_LAYOUTS[1], name: 'Living Room Layout', lastEdited: '2026-03-16T09:15:00Z' },
+];
 
 const MyDesigns = () => {
   const navigate = useNavigate();
@@ -85,28 +93,75 @@ const MyDesigns = () => {
             Loading your gallery...
           </div>
         ) : designs.length === 0 ? (
+          (() => {
+            const displayDesigns = SAMPLE_SAVED_DESIGNS;
+            return (
           <div style={{
-            textAlign: 'center',
-            padding: '100px 40px',
-            background: 'white',
-            borderRadius: '24px',
-            border: '2px dashed #E5E7EB',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 340px))',
+            gap: '24px',
+            marginBottom: '40px'
           }}>
-            <div style={{ padding: '20px', background: '#F9F7F4', borderRadius: '50%' }}>
-              <Maximize2 size={48} color="#8B7355" />
-            </div>
-            <h3 style={{ fontSize: '22px', fontWeight: '700', color: '#1F2937' }}>No designs found</h3>
-            <p style={{ color: '#64748b', fontSize: '16px', maxWidth: '400px', margin: '0 auto' }}>
-              Your creative journey starts here! Click the button above to create your first interior masterpiece.
-            </p>
-            <button className="db-btn-primary" onClick={() => navigate('/designer')} style={{ padding: '12px 32px' }}>
-              Start Designing
-            </button>
+            {displayDesigns.map(design => (
+              <div
+                key={design._id}
+                className="db-design-card"
+                onClick={() => navigate(design._id?.startsWith('sample-') ? '/designer' : `/designer?id=${design._id}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="db-design-img-wrap" style={{ height: '220px', background: '#fff', borderBottom: '1px solid #F3EDE6', overflow: 'hidden' }}>
+                  <DesignThumbnail
+                    designId={design._id}
+                    designData={design}
+                    className="db-design-img"
+                  />
+                  <div className="db-design-tag">2D Layout</div>
+                </div>
+                <div className="db-design-body">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <h3 className="db-design-title" style={{ fontSize: '17px' }}>{design.name}</h3>
+                    {!design._id?.startsWith('sample-') && (
+                    <button
+                      onClick={(e) => handleDelete(design._id, e)}
+                      className="delete-btn-hover"
+                      style={{
+                        color: '#9CA3AF',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '6px',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                    )}
+                  </div>
+                  <div className="db-design-meta" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Calendar size={14} />
+                    <span>Edited on {new Date(design.lastEdited).toLocaleDateString()}</span>
+                  </div>
+                  <button
+                    className="db-btn-outline"
+                    style={{
+                      width: '100%',
+                      marginTop: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      borderRadius: '12px'
+                    }}
+                  >
+                    <Edit3 size={16} /> Continue Editing
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
+            );
+          })()
         ) : (
           <div style={{
             display: 'grid',

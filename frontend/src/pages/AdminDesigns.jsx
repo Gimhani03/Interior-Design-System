@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AdminLayout } from '../components/AdminLayout'
 import DesignThumbnail from '../components/DesignThumbnail'
-import { getDesignsList } from '../data/designSamples'
+import { getDesignsList, getDesignLayout } from '../data/designSamples'
 import './FurnitureCatalog.css'
 import './Designs.css'
 
@@ -95,12 +95,24 @@ const AdminDesigns = () => {
                     <div className="dcard-body">
                       <h3 className="dcard-title">{design.title}</h3>
                       <p className="dcard-meta">Last edited: {design.lastEdited}</p>
-                      <button
-                        className="dcard-btn dcard-btn-continue"
-                        onClick={e => { e.stopPropagation(); navigate('/designer', { state: { designId: design.id } }) }}
-                      >
-                        Continue Editing
-                      </button>
+                      <div className="dcard-actions">
+                        <button
+                          className="dcard-btn dcard-btn-continue"
+                          onClick={e => { e.stopPropagation(); navigate('/designer', { state: { designId: design.id, title: design.title, saveToMyDesigns: true } }) }}
+                        >
+                          Edit Plan
+                        </button>
+                        <button
+                          className="dcard-btn dcard-btn-3d"
+                          onClick={e => {
+                            e.stopPropagation();
+                            const layout = getDesignLayout(design.id);
+                            navigate('/viewer', { state: { roomSize: layout.roomSize, furniture: layout.furniture, designId: design.id } });
+                          }}
+                        >
+                          View in 3D
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))

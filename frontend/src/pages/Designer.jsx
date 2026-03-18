@@ -480,8 +480,9 @@ const Designer = () => {
       shading: f.shading
     }));
 
-    // If editing a catalog design, always update the Designs section (works without login)
-    if (sampleDesignId) {
+    // If editing a sample design from Designs page (not admin), save to Designs section (localStorage)
+    const saveToMyDesigns = location.state?.saveToMyDesigns;
+    if (sampleDesignId && !saveToMyDesigns) {
       saveDesignLayout(sampleDesignId, {
         roomSize: { ...roomSize, points: roomSize.points || [] },
         furniture: layoutFurniture,
