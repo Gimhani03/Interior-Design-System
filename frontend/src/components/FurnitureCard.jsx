@@ -29,16 +29,10 @@ const FurnitureCard = ({ item, onViewDetails }) => {
 
         <div className="fcard-actions">
           <button
-            className="fcard-btn-outline"
+            className="fcard-btn-primary"
             onClick={e => { e.stopPropagation(); onViewDetails(item) }}
           >
             View Details
-          </button>
-          <button
-            className="fcard-btn-primary"
-            onClick={e => e.stopPropagation()}
-          >
-            Buy Now
           </button>
         </div>
       </div>
