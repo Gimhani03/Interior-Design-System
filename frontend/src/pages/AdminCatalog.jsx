@@ -175,24 +175,16 @@ const AdminCatalog = () => {
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button
                     style={{
-                      flex: 1, padding: '7px 0', borderRadius: 8, border: '1.5px solid #DDD6CE',
-                      background: '#fff', color: '#374151', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                      transition: 'all 0.18s',
-                    }}
-                    onClick={e => { e.stopPropagation(); navigate(`/product/${item._id}`) }}
-                  >
-                    View
-                  </button>
-                  <button
-                    style={{
-                      flex: 1, padding: '7px 0', borderRadius: 8, border: 'none',
+                      width: '100%', padding: '7px 0', borderRadius: 9, border: 'none',
                       background: 'linear-gradient(135deg, #8B7355 0%, #A0826D 100%)',
                       color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                      transition: 'opacity 0.18s',
+                      transition: 'opacity 0.2s, transform 0.2s',
                     }}
-                    onClick={e => { e.stopPropagation(); navigate(`/admin/edit/${item._id}`) }}
+                    onClick={e => { e.stopPropagation(); navigate(`/product/${item._id}`) }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)' }}
                   >
-                    Edit
+                    View Details
                   </button>
                 </div>
               </div>
