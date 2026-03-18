@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const OTP = require('../models/OTP');
 const sendEmail = require('../utils/sendEmail');
+const { getPasswordResetOTPTemplate } = require('../utils/emailTemplates');
 
 // Send OTP
 exports.sendOTP = async (req, res) => {
@@ -19,12 +20,10 @@ exports.sendOTP = async (req, res) => {
     // Save OTP to database
     await OTP.create({ email, otp });
 
-    // Send email
-    await sendEmail(
-      email,
-      'Password Reset OTP',
-      `Your OTP for password reset is: ${otp}\nValid for 10 minutes.`
-    );
+    // Send email with HTML template
+    const html = getPasswordResetOTPTemplate(otp);
+    const text = `Your verification code for password reset is: ${otp}\n\nThis code expires in 10 minutes. If you didn't request this, you can safely ignore this email.`;
+    await sendEmail(email, 'Password Reset – Your Verification Code', text, html);
 
     res.status(200).json({
       success: true,
