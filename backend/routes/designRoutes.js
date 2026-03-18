@@ -9,7 +9,7 @@ router.post('/', async (req, res) => {
     const { id, name, roomSize, furniture, thumbnail, userId, user: bodyUser } = req.body;
     const finalUserId = userId || bodyUser;
 
-    console.log("Saving design. ID:", id, "User:", finalUserId);
+    console.log("Save request received. ID:", id || "(none)", "User:", finalUserId, "Name:", name);
 
     if (!finalUserId) {
       return res.status(400).json({ message: "User ID is required to save designs." });
@@ -19,9 +19,16 @@ router.post('/', async (req, res) => {
     if (id && id !== "null" && id !== "undefined") {
       try {
         design = await Design.findById(id);
+        if (design) {
+          console.log(" Found existing design. Updating ID:", id);
+        } else {
+          console.log("Design ID provided but not found in database. Creating new design instead.");
+        }
       } catch (e) {
-        console.error("Invalid Design ID format:", id);
+        console.error(" Invalid Design ID format:", id, e.message);
       }
+    } else {
+      console.log("No ID provided. Creating new design.");
     }
 
     if (design) {
@@ -33,6 +40,7 @@ router.post('/', async (req, res) => {
       if (thumbnail) design.thumbnail = thumbnail;
       design.lastEdited = Date.now();
       await design.save();
+      console.log("Design updated successfully. ID:", design._id);
     } else {
       // Create new
       design = new Design({
@@ -43,6 +51,7 @@ router.post('/', async (req, res) => {
         thumbnail
       });
       await design.save();
+      console.log("New design created. ID:", design._id);
     }
 
     res.json(design);
