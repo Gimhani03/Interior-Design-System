@@ -48,7 +48,7 @@ function isPointInPoly(p, poly) {
 // ====================================================
 // COMPONENT 1: FURNITURE (Interactive & Boundary-Aware)
 // ====================================================
-function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, shadowIntensity = 0.6, onUpdate, onSelect, onDragToggle }) {
+function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, shadowIntensity = 0.75, onUpdate, onSelect, onDragToggle }) {
   const [isValid, setIsValid] = useState(true);
 
   const getModelPath = () => {
@@ -70,6 +70,8 @@ function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, sha
         node.material.color.set(isValid ? (f.color || '#ffffff') : '#ff4444');
         node.material.transparent = true;
         node.material.opacity = isValid ? 1.0 : 0.4;
+        node.castShadow = true; // Enable shadow casting
+        node.receiveShadow = true;
       }
     });
 
@@ -163,7 +165,6 @@ function FurnitureModel({ f, isSelected, roomSize, roomOffset, scale = 0.01, sha
       >
         <primitive object={mesh} onClick={(e) => { e.stopPropagation(); onSelect(f.id); }} />
       </PivotControls>
-      <ContactShadows opacity={f.shading ?? shadowIntensity} scale={Math.max(f.width, f.height) * scale * 2.5} blur={3} far={1} />
     </group>
   );
 }
@@ -201,7 +202,7 @@ function AdaptiveWall({ p1, p2, offset, h, wt, color }) {
 // ====================================================
 // COMPONENT 3: ARCHITECTURE (Floor & Walls)
 // ====================================================
-const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, shadowIntensity = 0.6, onUpdate, onSelect, onDragToggle }) => {
+const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, shadowIntensity = 0.75, onUpdate, onSelect, onDragToggle }) => {
   const scale = 0.01;
   const pts = useMemo(() => getCleanPoints(roomSize, roomSize.wallThickness || 20), [roomSize]);
 
@@ -227,6 +228,11 @@ const RoomArchitecture = ({ roomSize, roomOffset, furniture, selectedId, shadowI
   return (
     <group onPointerMissed={() => onSelect(null)}>
       {floorMeshes}
+      {/* Shadow receiver plane covering entire floor */}
+      <mesh position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow onClick={() => onSelect(null)}>
+        <planeGeometry args={[30, 30]} />
+        <shadowMaterial transparent opacity={shadowIntensity * 0.6} />
+      </mesh>
       {pts.map((p1, i) => <AdaptiveWall key={i} p1={p1} p2={pts[(i + 1) % pts.length]} offset={roomOffset} h={2.5} wt={(roomSize.wallThickness || 20) * scale} color={roomSize.wallColor || '#ffffff'} />)}
       {furniture.map(f => !f.isStructural && (
         <FurnitureModel
@@ -258,7 +264,7 @@ const Viewer3D = () => {
   const [furniture, setFurniture] = useState(initialFurniture);
   const [selectedId, setSelectedId] = useState(null);
   const [controlsEnabled, setControlsEnabled] = useState(true);
-  const [shadowIntensity, setShadowIntensity] = useState(0.6);
+  const [shadowIntensity, setShadowIntensity] = useState(0.75);
   const [is3DLoading, setIs3DLoading] = useState(true);
   const glRef = useRef(null);
 
@@ -352,7 +358,17 @@ const Viewer3D = () => {
           <RoomArchitecture roomSize={roomSize} roomOffset={roomOffset} furniture={furniture} selectedId={selectedId} shadowIntensity={shadowIntensity} onUpdate={updateFurniture} onSelect={setSelectedId} onDragToggle={setControlsEnabled} />
           <Environment preset="city" />
           <ambientLight intensity={0.6} />
-          <directionalLight position={[15, 30, 15]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]} />
+          <directionalLight
+            position={[15, 30, 15]}
+            intensity={1.2}
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-15}
+            shadow-camera-right={15}
+            shadow-camera-top={15}
+            shadow-camera-bottom={-15}
+            shadow-bias={-0.0001}
+          />
           <OrbitControls enabled={controlsEnabled} makeDefault enableDamping dampingFactor={0.05} maxPolarAngle={Math.PI / 2.2} minDistance={5} maxDistance={45} />
           <SceneReady onReady={() => setIs3DLoading(false)} />
         </Suspense>
@@ -388,19 +404,6 @@ const Viewer3D = () => {
                 </button>
               )}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <label style={{ fontSize: '11px', fontWeight: '600', color: '#64748b' }}>Shading (this item)</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={selectedItem.shading ?? shadowIntensity}
-                onChange={e => updateFurniture(selectedId, { shading: parseFloat(e.target.value) })}
-                style={{ flex: 1, maxWidth: 100, accentColor: '#8B7355' }}
-              />
-              <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#475569', minWidth: 28 }}>{Math.round((selectedItem.shading ?? shadowIntensity) * 100)}%</span>
-            </div>
             </div>
             <div style={{ fontSize: '11px', color: '#a0aec0', textAlign: 'center', fontWeight: 'bold' }}>DRAG TO MOVE · USE RINGS TO ROTATE</div>
           </div>
@@ -416,16 +419,22 @@ const Viewer3D = () => {
         <div style={{ background: 'rgba(255,255,255,0.9)', padding: '14px 24px', borderRadius: '20px', backdropFilter: 'blur(15px)', border: '1px solid rgba(255,255,255,0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <Sun size={18} color="#8B7355" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <label style={{ fontSize: '11px', fontWeight: '700', color: '#475569', letterSpacing: '0.5px' }}>SHADING</label>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={shadowIntensity}
-              onChange={e => setShadowIntensity(parseFloat(e.target.value))}
-              style={{ width: '120px', accentColor: '#8B7355' }}
-            />
+            <label style={{ fontSize: '11px', fontWeight: '700', color: '#475569', letterSpacing: '0.5px' }}>SHADOW INTENSITY</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={shadowIntensity}
+                onChange={e => {
+                  const newValue = parseFloat(e.target.value);
+                  console.log("🔆 Global shadow intensity changed to:", newValue);
+                  setShadowIntensity(newValue);
+                }}
+                style={{ width: '120px', accentColor: '#8B7355' }}
+              />
+            </div>
           </div>
           <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b', minWidth: 36 }}>{Math.round(shadowIntensity * 100)}%</span>
         </div>
