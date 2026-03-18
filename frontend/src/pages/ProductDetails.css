@@ -327,10 +327,13 @@
 
 /* CTA Buttons */
 .pd-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: block;
+  width: 100%;
   padding-top: 4px;
+}
+
+.pd-actions .pd-btn-primary {
+  width: 100%;
 }
 
 .pd-btn-primary {
