@@ -319,6 +319,12 @@ const Designer = () => {
         setHistory([state.directFurniture]);
         setHistoryStep(0);
         if (state.designName) setDesignName(state.designName);
+        // Preserve currentDesignId if it was set (for updates after 3D view)
+        if (state.designId && !state.designId.startsWith('sample-')) {
+          setCurrentDesignId(state.designId);
+        } else {
+          setCurrentDesignId(null);
+        }
         return;
       }
 
@@ -332,29 +338,39 @@ const Designer = () => {
         setRoomSize(sampleLayout.roomSize);
         setHistory([sampleLayout.furniture]);
         setHistoryStep(0);
+        setCurrentDesignId(null); // Clear ID for sample designs
         return;
       }
 
-      // Check for API design via URL
+      // Check for API design via URL (Continue Editing from My Designs)
       const urlParams = new URLSearchParams(window.location.search);
       const designId = urlParams.get('id');
-      if (designId) {
+      if (designId && designId !== 'null' && designId !== 'undefined') {
         try {
           const res = await axios.get(`http://localhost:5001/api/designs/${designId}`);
           const d = res.data;
           const furniture = (d.furniture || []).map(f => ({ ...f, id: f.clientId || f.id }));
-          setCurrentDesignId(d._id);
+          setCurrentDesignId(d._id); // Set the design ID for updating
           setDesignName(d.name);
           setRoomSize(d.roomSize);
           setHistory([furniture]);
           setHistoryStep(0);
-        } catch (err) { console.error("Load failed", err); }
+          console.log("✅ Loaded existing design for editing. ID:", d._id, "Name:", d.name);
+        } catch (err) {
+          console.error("❌ Failed to load design:", err);
+          toast.error("Failed to load design");
+          setCurrentDesignId(null);
+        }
+      } else {
+        // No design ID in URL - starting fresh
+        setCurrentDesignId(null);
+        console.log("🆕 Starting new design (no ID in URL)");
       }
     };
 
     fetchFurniture();
     loadDesignIfAny();
-  }, [location.state]);
+  }, [location.state, location.search]);
 
   const applyPhysics = (items) => {
     // Helper: Get oriented corners of a piece of furniture
@@ -529,12 +545,28 @@ const Designer = () => {
       thumbnail: uiThumbnail
     };
 
+    // Debug logging to verify the ID is included
+    if (currentDesignId) {
+      console.log("💾 Updating existing design. ID:", currentDesignId, "Name:", designName);
+    } else {
+      console.log("💾 Creating new design. Name:", designName);
+    }
+
     try {
       setIsSaving(true);
       const res = await axios.post('http://localhost:5001/api/designs', payload);
+      const wasUpdate = currentDesignId === res.data._id;
       setCurrentDesignId(res.data._id);
       setHasChanges(false);
-      toast.success("Design saved successfully! You can find it in 'My Designs'.");
+
+      if (wasUpdate) {
+        toast.success("Design updated successfully!");
+        console.log("✅ Design updated successfully. ID:", res.data._id);
+      } else {
+        toast.success("Design saved successfully! You can find it in 'My Designs'.");
+        console.log("✅ New design created. ID:", res.data._id);
+      }
+
       window.dispatchEvent(new CustomEvent('designs-updated'));
     } catch (err) {
       console.error("Save Error:", err);
