@@ -289,7 +289,6 @@ const Designer = () => {
   const [designName, setDesignName] = useState('My Interior Design');
   const [isSaving, setIsSaving] = useState(false);
   const [isTransitioningTo3D, setIsTransitioningTo3D] = useState(false);
-  const [bulkFurnitureColor, setBulkFurnitureColor] = useState('#795548');
   const stageRef = useRef(null);
   const polyDragRef = useRef(null);
 
@@ -1474,33 +1473,6 @@ const Designer = () => {
                   </div>
                 </div>
 
-                {furnitureOnFloor.length > 0 && (
-                  <div className="property-group">
-                    <label>Apply Colour to All Furniture</label>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <input
-                        type="color"
-                        value={bulkFurnitureColor}
-                        onChange={e => setBulkFurnitureColor(e.target.value)}
-                        style={{ width: '35px', height: '35px', border: 'none', padding: 0, cursor: 'pointer', background: 'transparent' }}
-                      />
-                      <button
-                        type="button"
-                        className="admin-action-btn edit"
-                        style={{ padding: '6px 12px', fontSize: '12px' }}
-                        onClick={() => {
-                          const count = furnitureOnFloor.filter(f => !f.isStructural).length;
-                          const updated = furnitureOnFloor.map(f => f.isStructural ? f : { ...f, color: bulkFurnitureColor });
-                          commitAction(updated);
-                          toast.success(`Applied colour to ${count} furniture item(s).`);
-                        }}
-                      >
-                        Apply to All
-                      </button>
-                    </div>
-                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: 4 }}>Sets finish colour for all furniture (visible in 3D).</p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -1554,20 +1526,6 @@ const Designer = () => {
                     <div className="property-group">
                       <label>Rotation (°)</label>
                       <input type="number" min="0" max="360" value={Math.round(getSelectedItem().rotation)} onChange={e => handlePropertyChange('rotation', Number(e.target.value))} />
-                    </div>
-
-                    <div className="property-group">
-                      <label>Finish Colour (3D)</label>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#f8fafc', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                        <input
-                          type="color"
-                          value={getSelectedItem().color || '#795548'}
-                          onChange={e => handlePropertyChange('color', e.target.value)}
-                          style={{ width: '35px', height: '35px', border: 'none', padding: 0, cursor: 'pointer', background: 'transparent' }}
-                        />
-                        <span style={{ fontSize: '13px', fontWeight: 'bold', fontFamily: 'monospace' }}>{(getSelectedItem().color || '#795548').toUpperCase()}</span>
-                      </div>
-                      <p style={{ fontSize: '11px', color: '#64748b', marginTop: 4 }}>Material colour in 3D view.</p>
                     </div>
                   </>
                 )}
