@@ -9,7 +9,8 @@ Interior Design System is a full‑stack web application for planning interior s
 - **Authentication & Roles**
   - Email/password login and registration
   - Separate **user** and **admin** experiences
-  - Password reset and confirmation flows
+  - Password reset and confirmation flows with OTP email verification
+  - Secure JWT-based authentication with role-based access control
 
 - **User Dashboard**
   - Overview of saved designs and recent activity
@@ -19,21 +20,29 @@ Interior Design System is a full‑stack web application for planning interior s
   - Drag‑and‑drop furniture on a 2D canvas
   - Snap‑to‑grid and boundary‑aware placement
   - Sample layouts (living room, bedroom, kitchen, etc.) to get started quickly
+  - Real-time furniture resizing with transform handles
+  - Design ID handling for persistent save operations
 
 - **3D Viewer (`Viewer3D`)**
   - BIM‑style 3D view powered by **React Three Fiber** and **three.js**
   - Interactive camera controls (orbit, zoom)
   - Real‑time furniture manipulation with collision/room‑boundary checks
+  - Preset furniture color options (Dark Walnut, Medium Brown, Matte Black, etc.)
+  - "Apply to All" feature for consistent color schemes across all furniture
+  - Adjustable shadow intensity slider for realistic lighting previews
   - Export current 3D view as a PNG image
 
 - **Furniture Catalog**
   - Rich catalog of furniture items with dimensions, materials, pricing, and ratings
   - Filter by category (Living Room, Bedroom, Office, Kitchen, etc.)
-  - Detail pages with descriptions and 3D/2D previews
+  - Detail pages with descriptions and 3D previews
+  - Responsive card layouts with improved button styles and interactions
 
 - **Admin Tools**
   - Admin dashboard for managing designs, furniture inventory, and users
   - Sample design layouts with override support (create, update, soft‑delete)
+  - Enhanced navigation and layout for sample design management
+  - User management interface with role-based permissions
 
 - **Orders & Payments (Conceptual)**
   - Order model and routes on the backend for tracking purchases
