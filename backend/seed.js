@@ -1,8 +1,9 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const Furniture = require('./models/Furniture'); // Ensure this matches your model file name
 
-// Use 127.0.0.1 to avoid IPv6 connection "hang" issues
-mongoose.connect('mongodb+srv://gimhanisamanalee_db_user:2pDhF3jtXDIk2ugD@cluster0.bwxwzcl.mongodb.net/Auth?appName=Cluster0')
+// Use environment variable for MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected for Seeding..."))
   .catch(err => console.error("❌ Connection Error:", err));
 
