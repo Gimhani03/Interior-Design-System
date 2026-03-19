@@ -31,10 +31,10 @@ const AboutUs = () => {
   };
 
   const features = [
-    { icon: <Sofa size={28} style={{ color: '#8B7355' }} />, title: 'Premium Furniture', desc: 'Explore our curated catalog of premium furniture items tailored for your space.' },
-    { icon: <Grid3X3 size={28} style={{ color: '#A0826D' }} />, title: '2D Room Planner', desc: 'Drag & drop furniture onto a precise 2D canvas with snap-to-grid functionality.' },
-    { icon: <Box size={28} style={{ color: '#C9A882' }} />, title: '3D Visualization', desc: 'Bring your room to life with immersive 3D rendering and camera controls.' },
-    { icon: <Shield size={28} style={{ color: '#8B7355' }} />, title: 'Save & Share', desc: 'Save your designs, export as images, and manage your projects seamlessly.' },
+    { icon: <Sofa size={28} style={{ color: '#8B7355' }} />, title: 'Premium Furniture Catalog', desc: 'Explore our curated catalog with detailed specs, ratings, pricing, and filter by room type or style.' },
+    { icon: <Grid3X3 size={28} style={{ color: '#A0826D' }} />, title: 'Smart 2D Designer', desc: 'Drag & drop with snap-to-grid, boundary checks, sample layouts, and real-time resizing handles.' },
+    { icon: <Box size={28} style={{ color: '#C9A882' }} />, title: 'Advanced 3D Viewer', desc: 'Interactive 3D rendering with preset finishes, adjustable shadows, collision detection, and orbit controls.' },
+    { icon: <Shield size={28} style={{ color: '#8B7355' }} />, title: 'Save & Export', desc: 'Persistent design storage, high-quality PNG exports, and seamless project management across sessions.' },
   ];
 
   const testimonials = [
@@ -58,7 +58,7 @@ const AboutUs = () => {
               Design Your Perfect Space in <span className="about-highlight">2D & 3D</span>
             </h1>
             <p className="about-description">
-              Browse premium furniture, plan your room layout, and visualize in stunning 3D — all in one place.
+              Browse premium furniture, plan with smart 2D tools, customize with preset finishes, and visualize in stunning 3D with adjustable lighting — all in one seamless platform.
             </p>
             <div className="about-buttons">
               <button onClick={handleGetStarted} className="about-btn-primary">
@@ -111,9 +111,11 @@ const AboutUs = () => {
           </div>
           <div className="about-steps-grid">
             {[
-              { step: '01', title: 'Create Account', desc: 'Sign up for free. Set up your profile and accessibility preferences.' },
-              { step: '02', title: 'Browse & Select', desc: 'Explore furniture by category. Add items to your room design.' },
-              { step: '03', title: 'Design & Visualize', desc: 'Use the 2D canvas to arrange furniture, then switch to 3D view.' },
+              { step: '01', title: 'Create Account', desc: 'Sign up for free with email verification. Access your personalized dashboard and design workspace.' },
+              { step: '02', title: 'Browse Furniture Catalog', desc: 'Explore our premium furniture collection filtered by room type, style, and category with detailed specs and pricing.' },
+              { step: '03', title: 'Design in 2D', desc: 'Use our intuitive drag-and-drop designer with snap-to-grid, sample layouts, and real-time resizing to plan your space.' },
+              { step: '04', title: 'Visualize in 3D', desc: 'View your design in stunning 3D with interactive controls, adjustable shadows, preset finishes, and collision detection.' },
+              { step: '05', title: 'Customize & Export', desc: 'Apply colors to all furniture, adjust lighting, save your designs, and export high-quality images of your perfect space.' },
             ].map((item, i) => (
               <div key={i} className="about-step-card">
                 <div className="about-step-number">{item.step}</div>
