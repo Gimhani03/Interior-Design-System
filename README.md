@@ -1,6 +1,6 @@
 # Interior Design System
 
-Interior Design System is a full‑stack web application for planning interior spaces with a **2D room planner**, **3D visualization**, and a **curated furniture catalog**. It supports both **end‑users** (designing their own rooms) and **admins** (managing furniture, designs, and users).
+Interior Design System is a full‑stack web application for planning interior spaces with a **2D room planner**, **3D visualization**, and a **curated furniture catalog**. It supports both **end‑users** (designing their own rooms) and **designers as admins** (managing furniture, designs, and users).
 
 ---
 
